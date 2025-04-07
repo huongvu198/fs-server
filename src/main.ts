@@ -1,4 +1,4 @@
-import './polyfill';
+import '../polyfill';
 import { Logger, ValidationPipe } from '@nestjs/common';
 
 import { NestFactory } from '@nestjs/core';
