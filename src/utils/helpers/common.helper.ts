@@ -2,7 +2,6 @@ import dayjs from 'dayjs';
 import { config } from '../../config/app.config';
 import { VerifyCodeEnum } from '../enum';
 import { REGEX } from '../constants';
-// import { VerifyAccount } from '../../modules/users/customer/customers.schema';
 
 const { nodeEnv = '' } = config;
 
