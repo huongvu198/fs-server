@@ -5,7 +5,6 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
-  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -50,7 +49,7 @@ export class ProductEntity extends EntityRelationalHelper {
   @Column({ type: Number })
   totalInventory: number;
 
-  @ManyToMany(() => SegmentEntity)
+  @ManyToOne(() => SegmentEntity)
   @JoinColumn({ name: 'segmentId' })
   segment: SegmentEntity;
 
@@ -71,9 +70,7 @@ export class ProductEntity extends EntityRelationalHelper {
   @Column()
   subCategoryId: string;
 
-  @OneToMany(() => VariantEntity, (variant) => variant.product, {
-    cascade: true,
-  })
+  @OneToMany(() => VariantEntity, (variant) => variant.product)
   variants: VariantEntity[];
 
   @CreateDateColumn()

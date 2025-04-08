@@ -121,7 +121,14 @@ export class ProductsService {
   async findByIdWithRelations(id: string) {
     return this.productsRepository.findOne({
       where: { id },
-      relations: ['variants', 'variants.sizes', 'variants.images'],
+      relations: [
+        'variants',
+        'variants.sizes',
+        'variants.images',
+        'segment',
+        'category',
+        'subCategory',
+      ],
     });
   }
 
@@ -178,6 +185,13 @@ export class ProductsService {
     sortOrder: 'ASC' | 'DESC',
   ) {
     const queryBuilder = this.productsRepository.createQueryBuilder('product');
+    queryBuilder
+      .leftJoinAndSelect('product.variants', 'variants')
+      .leftJoinAndSelect('variants.sizes', 'sizes')
+      .leftJoinAndSelect('variants.images', 'images')
+      .leftJoinAndSelect('product.segment', 'segment')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.subCategory', 'subCategory');
 
     queryBuilder.where('product.isArchived = :isArchived', {
       isArchived: false,
@@ -200,7 +214,7 @@ export class ProductsService {
 
     return {
       headers: responseHeaders,
-      items: products,
+      items: ProductMapper.toDomainList(products),
     };
   }
 
@@ -210,14 +224,16 @@ export class ProductsService {
     queryBuilder
       .leftJoinAndSelect('product.variants', 'variants')
       .leftJoinAndSelect('variants.sizes', 'sizes')
-      .leftJoinAndSelect('variants.images', 'images');
+      .leftJoinAndSelect('variants.images', 'images')
+      .leftJoinAndSelect('product.segment', 'segment')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.subCategory', 'subCategory');
 
     if (query?.name) {
-      const search = removeAccents(replaceQuerySearch(query.name));
-      queryBuilder.andWhere(
-        'LOWER(remove_accent(product.name)) LIKE LOWER(:name)',
-        { name: `%${search.toLowerCase()}%` },
-      );
+      const name = removeAccents(replaceQuerySearch(query.name));
+      queryBuilder.andWhere('LOWER(product.name) LIKE LOWER(:name)', {
+        name: `%${name.toLowerCase()}%`,
+      });
     }
 
     if (query?.isArchived !== undefined) {
@@ -381,6 +397,8 @@ export class ProductsService {
               existingSize.isActive = newSize.isActive;
               existingSize.inventory =
                 newSize.quantity - existingSize.soldQuantity;
+
+              await this.productsRepository.manager.save(existingSize);
             } else {
               const variantSize = this.productsRepository.manager.create(
                 VariantSizeEntity,
@@ -476,6 +494,20 @@ export class ProductsService {
     await this.productsRepository.save(existingProduct);
 
     // Trả về sản phẩm đã cập nhật
-    return this.findByIdWithRelations(productId);
+    const product = await this.findByIdWithRelations(productId);
+
+    if (!product) {
+      throw new BadRequestException(Errors.PRODUCT_NOT_FOUND);
+    }
+
+    return ProductMapper.toDomain(product);
+  }
+
+  async findProductByIdCms(id: string) {
+    const product = await this.findByIdWithRelations(id);
+    if (!product) {
+      throw new BadRequestException(Errors.PRODUCT_NOT_FOUND);
+    }
+    return ProductMapper.toDomain(product);
   }
 }

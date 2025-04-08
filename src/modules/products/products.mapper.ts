@@ -15,6 +15,27 @@ export class ProductMapper {
       totalInventory: raw.totalInventory,
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
+      segment: raw.segment
+        ? {
+            id: raw.segment.id,
+            name: raw.segment.name,
+            slug: raw.segment.slug,
+            category: raw.category
+              ? {
+                  id: raw.category.id,
+                  name: raw.category.name,
+                  cateSlug: raw.category.cateSlug,
+                  subCategory: raw.subCategory
+                    ? {
+                        id: raw.subCategory.id,
+                        name: raw.subCategory.name,
+                        subCateSlug: raw.subCategory.subCateSlug,
+                      }
+                    : null,
+                }
+              : null,
+          }
+        : null,
       variants: raw.variants
         ? raw.variants.map((variant) => ({
             id: variant.id,
