@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -93,6 +94,12 @@ export class ProductsController {
   @Get('/:id')
   @HttpCode(HttpStatus.OK)
   async findProductByIdCms(@Param('id') productId: string) {
-    return await this.productsService.findByIdWithRelations(productId);
+    return await this.productsService.findProductByIdCms(productId);
+  }
+
+  @Delete('/:id')
+  @HttpCode(HttpStatus.OK)
+  async deleteProduct(@Param('id') productId: string) {
+    return await this.productsService.delete(productId);
   }
 }

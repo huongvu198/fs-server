@@ -1,3 +1,6 @@
 import * as nodeCrypto from 'crypto';
 
-(global as any).crypto = nodeCrypto;
+// Check if global.crypto is undefined before assigning
+if (typeof global.crypto === 'undefined') {
+  (global as any).crypto = nodeCrypto;
+}
