@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserByAdminDto, CreateUserDto } from './dto/create-user.dto';
 import bcrypt from 'bcryptjs';
 import { UserEntity } from '../../entities/users.entity';
 import { UserMapper } from './users.mappers';
@@ -13,7 +13,11 @@ import { IPagination } from '../../utils/pagination/pagination.interface';
 import { PaginationHeaderHelper } from '../../utils/pagination/pagination.helper';
 import removeAccents from 'remove-accents';
 import { Errors } from '../../errors/errors';
-import { replaceQuerySearch } from '../../utils/helpers/common.helper';
+import {
+  joinFullName,
+  replaceQuerySearch,
+  splitFullName,
+} from '../../utils/helpers/common.helper';
 
 @Injectable()
 export class UsersService {
@@ -47,9 +51,12 @@ export class UsersService {
   async findManyWithPagination(
     filterOptions: FilterUserDto,
     pagination: IPagination,
-  ): Promise<{ headers: any; items: UserEntity[] }> {
+  ) {
     const queryBuilder = this.usersRepository.createQueryBuilder('user');
-
+    queryBuilder
+      .leftJoinAndSelect('user.role', 'role')
+      .leftJoinAndSelect('user.status', 'status')
+      .leftJoinAndSelect('user.addresses', 'user-address');
     if (filterOptions?.role) {
       queryBuilder.andWhere('user.roleId = :roleId', {
         roleId: filterOptions.role,
@@ -74,7 +81,7 @@ export class UsersService {
 
     return {
       headers,
-      items,
+      items: UserMapper.toDomainList(items),
     };
   }
 
@@ -85,7 +92,7 @@ export class UsersService {
   async findByIdWithRelations(id: number) {
     return await this.usersRepository.findOne({
       where: { id },
-      relations: ['role', 'status'],
+      relations: ['role', 'status', 'addresses'],
     });
   }
 
@@ -110,11 +117,51 @@ export class UsersService {
     if (updateUserDto.status) {
       updateData.status = { id: updateUserDto.status } as StatusEntity;
     }
+
+    if (updateUserDto.firstName && updateUserDto.lastName) {
+      updateData.firstName = updateUserDto.firstName;
+      updateData.lastName = updateUserDto.lastName;
+      updateData.fullName = joinFullName(
+        updateUserDto.lastName,
+        updateUserDto.firstName,
+      );
+    } else if (updateUserDto.fullName) {
+      const { firstName, lastName } = splitFullName(updateUserDto.fullName);
+      updateData.firstName = firstName;
+      updateData.lastName = lastName;
+      updateData.fullName = updateUserDto.fullName;
+    }
+
     await this.usersRepository.update(id, updateData);
     return this.findByIdWithRelations(id);
   }
 
   async remove(id: number) {
     await this.usersRepository.softDelete(id);
+  }
+
+  async createByAdmin(dto: CreateUserByAdminDto) {
+    const salt = await bcrypt.genSalt();
+    dto.password = await bcrypt.hash(dto.password, salt);
+
+    const existingUser = await this.usersRepository.findOne({
+      where: { email: dto.email },
+    });
+
+    if (existingUser) {
+      throw new BadRequestException(Errors.EMAIL_ALREADY_EXISTS);
+    }
+
+    const user = await this.usersRepository.save(
+      UserMapper.createByAdminToPersistence(dto),
+    );
+
+    const userWithRelations = await this.findByIdWithRelations(user.id);
+
+    if (!userWithRelations) {
+      throw new BadRequestException(Errors.USER_NOT_FOUND);
+    }
+
+    return UserMapper.toDomain(userWithRelations);
   }
 }

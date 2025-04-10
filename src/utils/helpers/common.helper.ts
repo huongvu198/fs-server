@@ -26,3 +26,18 @@ export const generateVerifyAccountInfo = (type: VerifyCodeEnum) => {
 
   return verifyAccount;
 };
+
+export function splitFullName(fullName: string): {
+  firstName: string;
+  lastName: string;
+} {
+  const parts = fullName.trim().split(/\s+/); // tách theo khoảng trắng
+  const lastName = parts[0]; // Họ
+  const firstName = parts.slice(1).join(' '); // Tên + tên đệm
+
+  return { firstName, lastName };
+}
+
+export function joinFullName(lastName: string, firstName: string): string {
+  return `${lastName} ${firstName}`.trim();
+}

@@ -1,7 +1,9 @@
 import { RoleEntity } from 'src/entities/roles.entity';
 import { UserEntity } from '../../entities/users.entity';
 import { StatusEntity } from 'src/entities/status.entity';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserByAdminDto, CreateUserDto } from './dto/create-user.dto';
+import { AuthProvidersEnum, StatusEnum } from '../../utils/enum';
+import { joinFullName, splitFullName } from '../../utils/helpers/common.helper';
 
 export class UserMapper {
   static toDomain(raw: UserEntity) {
@@ -17,6 +19,16 @@ export class UserMapper {
       updatedAt: raw.updatedAt,
       role: raw.role ? { id: raw.role.id, name: raw.role.name } : null,
       status: raw.status ? { id: raw.status.id, name: raw.status.name } : null,
+      addresses: raw.addresses
+        ? raw.addresses.map((address) => ({
+            id: address.id,
+            street: address.street,
+            city: address.city,
+            ward: address.ward,
+            country: address.country,
+            isDefault: address.isDefault,
+          }))
+        : [],
     };
   }
 
@@ -33,7 +45,7 @@ export class UserMapper {
     entity.lastName = dto.lastName;
     entity.provider = dto.provider;
     entity.socialId = dto.socialId;
-    entity.fullName = dto.lastName + dto.firstName;
+    entity.fullName = joinFullName(dto.lastName, dto.firstName);
     if (dto.role) {
       entity.role = new RoleEntity();
       entity.role.id = dto.role;
@@ -43,6 +55,26 @@ export class UserMapper {
       entity.status = new StatusEntity();
       entity.status.id = dto.status;
     }
+
+    return entity;
+  }
+
+  static createByAdminToPersistence(dto: CreateUserByAdminDto): UserEntity {
+    const { firstName, lastName } = splitFullName(dto.fullName);
+    const entity = new UserEntity();
+    entity.email = dto.email;
+    entity.password = dto.password;
+    entity.firstName = firstName;
+    entity.lastName = lastName;
+    entity.provider = AuthProvidersEnum.EMAIL;
+    entity.fullName = dto.fullName;
+    if (dto.role) {
+      entity.role = new RoleEntity();
+      entity.role.id = dto.role;
+    }
+
+    entity.status = new StatusEntity();
+    entity.status.id = StatusEnum.ACTIVE;
 
     return entity;
   }
