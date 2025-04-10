@@ -28,6 +28,10 @@ export class UpdateUserDto {
   @IsOptional()
   lastName?: string;
 
+  @ApiPropertyOptional({ example: 'Doe', type: String })
+  @IsOptional()
+  fullName?: string;
+
   @ApiPropertyOptional({ type: Number })
   @IsOptional()
   @IsNumber()

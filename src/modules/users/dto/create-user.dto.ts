@@ -46,3 +46,23 @@ export class CreateUserDto {
   @IsNumber()
   status: number;
 }
+
+export class CreateUserByAdminDto {
+  @ApiProperty({ example: 'test1@example.com', type: String })
+  @Transform(lowerCaseTransformer)
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
+  @ApiProperty()
+  @MinLength(8)
+  password: string;
+
+  @ApiProperty({ example: 'John Doe', type: String })
+  @IsNotEmpty()
+  fullName: string;
+
+  @ApiProperty({ type: Number })
+  @IsNumber()
+  role: number;
+}
