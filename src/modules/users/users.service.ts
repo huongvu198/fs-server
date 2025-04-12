@@ -157,6 +157,12 @@ export class UsersService {
       throw new BadRequestException(Errors.EMAIL_ALREADY_EXISTS);
     }
 
+    if (dto.fullName) {
+      const { firstName, lastName } = splitFullName(dto.fullName);
+      dto.firstName = firstName;
+      dto.lastName = lastName;
+    }
+
     const user = await this.usersRepository.save(
       UserMapper.createByAdminToPersistence(dto),
     );

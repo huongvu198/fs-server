@@ -65,4 +65,7 @@ export class CreateUserByAdminDto {
   @ApiProperty({ type: Number })
   @IsNumber()
   role: number;
+
+  firstName?: string;
+  lastName?: string;
 }
