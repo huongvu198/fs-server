@@ -161,7 +161,7 @@ export class UsersService {
       UserMapper.createByAdminToPersistence(dto),
     );
 
-    const userWithRelations = await this.findByIdWithRelations(user.id);
+    const userWithRelations = await this.findByIdWithRelations(Number(user.id));
 
     if (!userWithRelations) {
       throw new BadRequestException(Errors.USER_NOT_FOUND);
