@@ -74,7 +74,7 @@ export class UserMapper {
     }
 
     entity.status = new StatusEntity();
-    entity.status.id = StatusEnum.ACTIVE;
+    entity.status.id = Number(StatusEnum.ACTIVE);
 
     return entity;
   }

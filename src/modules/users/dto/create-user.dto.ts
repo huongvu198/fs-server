@@ -55,7 +55,7 @@ export class CreateUserByAdminDto {
   email: string;
 
   @ApiProperty()
-  @MinLength(8)
+  @MinLength(8, { message: 'Cần ít nhất 8 ký tự' })
   password: string;
 
   @ApiProperty({ example: 'John Doe', type: String })
@@ -65,4 +65,7 @@ export class CreateUserByAdminDto {
   @ApiProperty({ type: Number })
   @IsNumber()
   role: number;
+
+  firstName?: string;
+  lastName?: string;
 }
