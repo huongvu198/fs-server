@@ -5,11 +5,13 @@ import { ProductsModule } from '../products/products.module';
 import { Module } from '@nestjs/common';
 import { CartService } from './carts.service';
 import { CartController } from './carts.controller';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([CartEntity, CartItemEntity]),
     ProductsModule,
+    UsersModule,
   ],
   controllers: [CartController],
   providers: [CartService],

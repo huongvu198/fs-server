@@ -19,18 +19,18 @@ export class CartItemEntity {
   @JoinColumn({ name: 'cartId' })
   cart: CartEntity;
 
-  @ManyToOne(() => ProductEntity)
+  @ManyToOne(() => ProductEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'productId' })
   product: ProductEntity;
 
-  @ManyToOne(() => VariantEntity)
+  @ManyToOne(() => VariantEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'variantId' })
   variant: VariantEntity;
 
-  @ManyToOne(() => VariantSizeEntity)
+  @ManyToOne(() => VariantSizeEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'sizeId' })
   size: VariantSizeEntity;
 
-  @Column({ type: Number })
+  @Column({ type: 'int' })
   quantity: number;
 }

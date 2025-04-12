@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserByAdminDto, CreateUserDto } from './dto/create-user.dto';
@@ -21,6 +21,7 @@ import {
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
   constructor(
     @InjectRepository(UserEntity)
     private readonly usersRepository: Repository<UserEntity>,
@@ -141,6 +142,10 @@ export class UsersService {
   }
 
   async createByAdmin(dto: CreateUserByAdminDto) {
+    //Log check performance
+    const start = Date.now();
+    this.logger.log('Creating user by admin...');
+
     const salt = await bcrypt.genSalt();
     dto.password = await bcrypt.hash(dto.password, salt);
 
@@ -161,7 +166,8 @@ export class UsersService {
     if (!userWithRelations) {
       throw new BadRequestException(Errors.USER_NOT_FOUND);
     }
-
+    const end = Date.now();
+    this.logger.log(`User created in ${end - start}ms`);
     return UserMapper.toDomain(userWithRelations);
   }
 }

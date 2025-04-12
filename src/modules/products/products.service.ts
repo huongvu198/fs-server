@@ -539,21 +539,13 @@ export class ProductsService {
     return variant;
   }
 
-  async validateSize(
-    sizeId: string,
-    quantity: number,
-  ): Promise<VariantSizeEntity> {
+  async validateSize(sizeId: string): Promise<VariantSizeEntity> {
     const size = await this.variantSizeRepository.findOne({
       where: { id: sizeId },
     });
     if (!size) throw new NotFoundException('Kích thước không tồn tại');
     if (!size.isActive)
       throw new BadRequestException('Kích thước đã ngừng bán');
-    if (size.inventory < quantity) {
-      throw new BadRequestException(
-        `Kích thước này chỉ còn ${size.inventory} sản phẩm`,
-      );
-    }
     return size;
   }
 }
