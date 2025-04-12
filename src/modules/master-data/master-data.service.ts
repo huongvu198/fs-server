@@ -26,11 +26,10 @@ export class MasterDataService {
       return await this.masterDataRepository.save(newMasterData);
     }
 
-    const result = await this.masterDataRepository.update(
-      { id },
-      { data: dto.data },
-    );
-    return result;
+    await this.masterDataRepository.update({ id }, { data: dto.data });
+    return await this.masterDataRepository.findOne({
+      where: { id },
+    });
   }
 
   async findMasterData() {

@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsObject, IsString } from 'class-validator';
+import { IsNumber, IsObject } from 'class-validator';
 
 export class UpdateMasterDataDto {
   @ApiProperty({
-    type: String,
+    type: Number,
   })
-  @IsString()
-  id: string;
+  @IsNumber()
+  id: number;
 
   @ApiProperty({
     example: {
