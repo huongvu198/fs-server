@@ -6,6 +6,8 @@ import { SeedModule } from '../database/seeds/seed.module';
 import { UsersModule } from './users/users.module';
 import { MasterDataModule } from './master-data/master-data.module';
 import { ProductsModule } from './products/products.module';
+import { CartsModule } from './carts/carts.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { ProductsModule } from './products/products.module';
     UsersModule,
     MasterDataModule,
     ProductsModule,
+    CartsModule,
+    HealthModule,
   ],
 })
 export class ApiModule {}

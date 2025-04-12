@@ -22,3 +22,9 @@ export enum RoleEnum {
   ADMIN = 1,
   USER = 2,
 }
+
+export enum CartItemStatusEnum {
+  AVAILABLE = 'AVAILABLE',
+  SOLD_OUT = 'SOLD_OUT',
+  UNAVAILABLE = 'UNAVAILABLE',
+}
