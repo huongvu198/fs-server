@@ -28,3 +28,8 @@ export enum CartItemStatusEnum {
   SOLD_OUT = 'SOLD_OUT',
   UNAVAILABLE = 'UNAVAILABLE',
 }
+
+export enum DiscountType {
+  PERCENT = 'PERCENT',
+  FIXED = 'FIXED',
+}

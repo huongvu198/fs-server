@@ -331,7 +331,6 @@ export class ProductsService {
   }
 
   async update(productId: string, dto: UpdateProductDto) {
-    console.log('dto', JSON.stringify(dto));
     // Tìm sản phẩm hiện tại
     const existingProduct = await this.productsRepository.findOne({
       where: { id: productId },

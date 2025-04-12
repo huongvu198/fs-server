@@ -176,4 +176,8 @@ export class UsersService {
     this.logger.log(`User created in ${end - start}ms`);
     return UserMapper.toDomain(userWithRelations);
   }
+
+  async findAll() {
+    return await this.usersRepository.find();
+  }
 }

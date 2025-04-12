@@ -1,9 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  Column,
+  Unique,
+  DeleteDateColumn,
+} from 'typeorm';
 import { VoucherEntity } from './voucher.entity';
 import { UserEntity } from './users.entity';
 
-@Entity()
-export class VoucherUser {
+@Unique(['user', 'voucher'])
+@Entity({ name: 'voucher-users' })
+export class VoucherUserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -18,4 +26,7 @@ export class VoucherUser {
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 }

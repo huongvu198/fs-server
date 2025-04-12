@@ -7,40 +7,57 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { UserEntity } from './users.entity';
-import { VoucherUser } from './voucher-user.entity';
+import { VoucherUserEntity } from './voucher-user.entity';
+import { DiscountType } from 'src/utils/enum';
 
 @Entity({ name: 'vouchers' })
 export class VoucherEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ unique: true })
   code: string;
 
   @Column()
   discount: number;
 
+  @Column({
+    type: 'enum',
+    enum: DiscountType,
+  })
+  type: DiscountType;
+
   @Column({ type: 'timestamp' })
-  expriceDate: Date;
+  startDate: Date;
+
+  @Column({ type: 'timestamp' })
+  endDate: Date;
 
   @Column({ default: true })
   isActive: boolean;
+
+  @Column({ type: Number, nullable: true })
+  quantity?: number;
 
   @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
-  @Column()
+  @Column({ nullable: true })
   userId: number;
 
-  @OneToMany(() => VoucherUser, (voucherUser) => voucherUser.voucher)
-  voucherUsers?: VoucherUser[];
+  @OneToMany(() => VoucherUserEntity, (voucherUser) => voucherUser.voucher)
+  voucherUsers?: VoucherUserEntity[];
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 }

@@ -8,6 +8,7 @@ import { MasterDataModule } from './master-data/master-data.module';
 import { ProductsModule } from './products/products.module';
 import { CartsModule } from './carts/carts.module';
 import { HealthModule } from './health/health.module';
+import { VouchersModule } from './voucher/voucher.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { HealthModule } from './health/health.module';
     ProductsModule,
     CartsModule,
     HealthModule,
+    VouchersModule,
   ],
 })
 export class ApiModule {}

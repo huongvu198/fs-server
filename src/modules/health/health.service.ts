@@ -20,7 +20,7 @@ export class HealthService extends HealthIndicator {
   }
 
   async healthCheck(): Promise<HealthCheckResult> {
-    return this.health.check(this.pingCheck());
+    return await this.health.check(this.pingCheck());
   }
 
   pingCheck(): HealthIndicatorFunction[] {

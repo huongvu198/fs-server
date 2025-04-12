@@ -14,7 +14,7 @@ import { RoleEntity } from './roles.entity';
 import { StatusEntity } from './status.entity';
 import { AuthProvidersEnum } from '../utils/enum';
 import { UserAddressEntity } from './user-address.entity';
-import { VoucherUser } from './voucher-user.entity';
+import { VoucherUserEntity } from './voucher-user.entity';
 
 @Entity({
   name: 'user',
@@ -73,6 +73,6 @@ export class UserEntity {
   @OneToMany(() => UserAddressEntity, (address) => address.user)
   addresses?: UserAddressEntity[];
 
-  @OneToMany(() => VoucherUser, (voucherUser) => voucherUser.user)
-  vouchers?: VoucherUser[];
+  @OneToMany(() => VoucherUserEntity, (voucherUser) => voucherUser.user)
+  vouchers?: VoucherUserEntity[];
 }
