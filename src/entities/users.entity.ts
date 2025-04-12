@@ -14,6 +14,7 @@ import { RoleEntity } from './roles.entity';
 import { StatusEntity } from './status.entity';
 import { AuthProvidersEnum } from '../utils/enum';
 import { UserAddressEntity } from './user-address.entity';
+import { VoucherUser } from './voucher-user.entity';
 
 @Entity({
   name: 'user',
@@ -57,6 +58,9 @@ export class UserEntity {
   })
   status: StatusEntity;
 
+  @Column({ default: 0 })
+  point: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -68,4 +72,7 @@ export class UserEntity {
 
   @OneToMany(() => UserAddressEntity, (address) => address.user)
   addresses?: UserAddressEntity[];
+
+  @OneToMany(() => VoucherUser, (voucherUser) => voucherUser.user)
+  vouchers?: VoucherUser[];
 }
