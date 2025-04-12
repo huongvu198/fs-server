@@ -18,7 +18,7 @@ async function bootstrap() {
   });
   await initializeSwagger(app);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-  await app.listen(SERVER_PORT);
+  await app.listen(SERVER_PORT, '0.0.0.0');
 }
 void bootstrap().then(() => {
   Logger.log(`${SERVICE_NAME} API service started`);

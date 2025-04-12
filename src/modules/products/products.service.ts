@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductEntity } from '../../entities/products.entity';
 import { Repository } from 'typeorm';
@@ -25,6 +29,10 @@ export class ProductsService {
   constructor(
     @InjectRepository(ProductEntity)
     private readonly productsRepository: Repository<ProductEntity>,
+    @InjectRepository(VariantEntity)
+    private readonly variantRepository: Repository<VariantEntity>,
+    @InjectRepository(VariantSizeEntity)
+    private readonly variantSizeRepository: Repository<VariantSizeEntity>,
     private readonly segmentsService: SegmentsService,
     private readonly categoriesService: CategoriesService,
     private readonly subCategoriesService: SubCategoriesService,
@@ -509,5 +517,35 @@ export class ProductsService {
       throw new BadRequestException(Errors.PRODUCT_NOT_FOUND);
     }
     return ProductMapper.toDomain(product);
+  }
+
+  async validateProduct(productId: string): Promise<ProductEntity> {
+    const product = await this.productsRepository.findOne({
+      where: { id: productId },
+    });
+    if (!product) throw new NotFoundException('Sản phẩm không tồn tại');
+    if (!product.isActive)
+      throw new BadRequestException('Sản phẩm đã ngừng bán');
+    return product;
+  }
+
+  async validateVariant(variantId: string): Promise<VariantEntity> {
+    const variant = await this.variantRepository.findOne({
+      where: { id: variantId },
+    });
+    if (!variant) throw new NotFoundException('Màu sản phẩm không tồn tại');
+    if (!variant.isActive)
+      throw new BadRequestException('Màu sản phẩm đã ngừng bán');
+    return variant;
+  }
+
+  async validateSize(sizeId: string): Promise<VariantSizeEntity> {
+    const size = await this.variantSizeRepository.findOne({
+      where: { id: sizeId },
+    });
+    if (!size) throw new NotFoundException('Kích thước không tồn tại');
+    if (!size.isActive)
+      throw new BadRequestException('Kích thước đã ngừng bán');
+    return size;
   }
 }

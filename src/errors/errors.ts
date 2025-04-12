@@ -125,4 +125,24 @@ export const Errors: Record<string, ErrorType> = {
     message: 'Invalid hash',
     statusCode: HttpStatus.BAD_REQUEST,
   },
+  PRODUCT_INACTIVE: {
+    errorCode: getErrorCode(ErrorCode.PRODUCT_INACTIVE),
+    message: 'This product is currently unavailable.',
+    statusCode: HttpStatus.BAD_REQUEST,
+  },
+  VARIANT_INACTIVE: {
+    errorCode: getErrorCode(ErrorCode.VARIANT_INACTIVE),
+    message: 'This variant is currently unavailable.',
+    statusCode: HttpStatus.BAD_REQUEST,
+  },
+  SIZE_INACTIVE: {
+    errorCode: getErrorCode(ErrorCode.SIZE_INACTIVE),
+    message: 'This size is currently unavailable.',
+    statusCode: HttpStatus.BAD_REQUEST,
+  },
+  SIZE_OUT_OF_STOCK: {
+    errorCode: getErrorCode(ErrorCode.SIZE_OUT_OF_STOCK),
+    message: 'This size is currently out of stock.',
+    statusCode: HttpStatus.BAD_REQUEST,
+  },
 };
