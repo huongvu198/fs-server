@@ -331,6 +331,7 @@ export class ProductsService {
   }
 
   async update(productId: string, dto: UpdateProductDto) {
+    console.log('dto', JSON.stringify(dto));
     // Tìm sản phẩm hiện tại
     const existingProduct = await this.productsRepository.findOne({
       where: { id: productId },
@@ -393,6 +394,7 @@ export class ProductsService {
         if (existingVariant) {
           // Cập nhật trạng thái và danh sách size
           existingVariant.isActive = newVariant.isActive;
+          await this.productsRepository.manager.save(existingVariant);
 
           let existingSize;
           for (const newSize of newVariant.sizes) {
