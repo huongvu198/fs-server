@@ -1,27 +1,31 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
-import { config } from 'src/config/app.config';
+import { config } from '../../../config/app.config';
 import { GenerateQRDto } from '../dto/viet-qr.dto';
-const { clientId, apiKey } = config.vietQR;
+import { BankService } from '../bank/bank.service';
+const { clientId, apiKey, baseUrl } = config.vietQR;
 
 @Injectable()
 export class VietQRService {
-  constructor(private httpService: HttpService) {}
+  constructor(
+    private httpService: HttpService,
+    private readonly bankService: BankService,
+  ) {}
 
   async generateQR(payload: GenerateQRDto) {
     const { accountNo, accountName, acqId, amount, addInfo } = payload;
-
     const response = await firstValueFrom(
       this.httpService.post(
-        'https://api.vietqr.io/v2/generate',
+        baseUrl,
         {
-          bin: acqId, // hoặc acqId là bin
-          accountNo,
+          acqId: Number(acqId),
+          accountNo: accountNo,
           accountName,
-          amount,
+          amount: Number(amount),
           addInfo,
-          template: 'compact',
+          format: 'text',
+          template: 'compact2',
         },
         {
           headers: {
@@ -34,5 +38,19 @@ export class VietQRService {
     );
 
     return response.data;
+  }
+
+  async generateQRByBankId(bankId: string) {
+    const bankAccount = await this.bankService.findOne(bankId);
+
+    const payload: GenerateQRDto = {
+      accountName: bankAccount.accountName,
+      accountNo: bankAccount.accountNo,
+      acqId: bankAccount.acqId,
+      amount: 10000,
+      addInfo: 'Admin Checking STK',
+    };
+
+    return await this.generateQR(payload);
   }
 }

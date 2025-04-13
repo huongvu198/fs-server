@@ -66,5 +66,6 @@ export const config = {
   vietQR: {
     clientId: env.VIETQR_CLIENT_ID,
     apiKey: env.VIETQR_API_KEY,
+    baseUrl: env.VIETQR_BASE_URL ?? 'https://api.vietqr.io/v2/generate',
   },
 };
