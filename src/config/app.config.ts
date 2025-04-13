@@ -63,4 +63,8 @@ export const config = {
     apiKey: env.CLOUDINARY_API_KEY,
     apiSecret: env.CLOUDINARY_API_SECRET,
   },
+  vietQR: {
+    clientId: env.VIETQR_CLIENT_ID,
+    apiKey: env.VIETQR_API_KEY,
+  },
 };

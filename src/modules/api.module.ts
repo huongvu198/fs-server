@@ -9,6 +9,7 @@ import { ProductsModule } from './products/products.module';
 import { CartsModule } from './carts/carts.module';
 import { HealthModule } from './health/health.module';
 import { VouchersModule } from './voucher/voucher.module';
+import { PaymentGatewayModule } from './payment-gateway/payment-gateway.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { VouchersModule } from './voucher/voucher.module';
     CartsModule,
     HealthModule,
     VouchersModule,
+    PaymentGatewayModule,
   ],
 })
 export class ApiModule {}
