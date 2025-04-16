@@ -20,7 +20,7 @@ export class SubCategoryEntity extends EntityRelationalHelper {
   @Column({ type: String, nullable: false })
   name: string;
 
-  @Column({ type: String, nullable: false, unique: true })
+  @Column({ type: String, nullable: false })
   subCateSlug: string;
 
   @Column({ type: Boolean, default: true })
