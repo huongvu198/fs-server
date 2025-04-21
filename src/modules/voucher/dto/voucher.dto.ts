@@ -59,3 +59,10 @@ export class GetVoucherDto {
   @Transform(({ value }) => value === 'true' || value === true)
   isActive?: boolean;
 }
+
+export class ApplyVoucherDto {
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  code: string;
+}

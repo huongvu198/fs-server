@@ -13,27 +13,11 @@ import { UserAddressEntity } from './user-address.entity';
 import { VoucherEntity } from './voucher.entity';
 import { OrderItemEntity } from './order-items.entity';
 import { TransactionEntity } from './transactions.entity';
-
-export enum OrderStatusEnum {
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  PROCESSING = 'processing',
-  SHIPPING = 'shipping',
-  DELIVERED = 'delivered',
-  CANCELLED = 'cancelled',
-}
-
-export enum PaymentMethodEnum {
-  COD = 'cod',
-  BANKING = 'banking',
-}
-
-export enum PaymentStatusEnum {
-  PENDING = 'pending',
-  PAID = 'paid',
-  FAILED = 'failed',
-  REFUNDED = 'refunded',
-}
+import {
+  OrderStatusEnum,
+  PaymentMethodEnum,
+  PaymentStatusEnum,
+} from '../utils/enum';
 
 @Entity({ name: 'orders' })
 export class OrderEntity {
@@ -103,11 +87,17 @@ export class OrderEntity {
   transactions: TransactionEntity[];
 
   @Column({ nullable: true })
-  transactionId: string; // Mã giao dịch ngân hàng chính thức (từ transaction)
+  transactionId: string;
+
+  @Column({ nullable: false })
+  code: string;
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  paymentExpiredAt: Date;
 }

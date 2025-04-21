@@ -533,7 +533,7 @@ export class ProductsService {
   async validateVariant(variantId: string): Promise<VariantEntity> {
     const variant = await this.variantRepository.findOne({
       where: { id: variantId },
-      relations: ['variants.images'],
+      relations: ['images'],
     });
     if (!variant) throw new NotFoundException('Màu sản phẩm không tồn tại');
     if (!variant.isActive)

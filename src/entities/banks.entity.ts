@@ -34,4 +34,7 @@ export class BankEntity {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  lastOrder: Date;
 }

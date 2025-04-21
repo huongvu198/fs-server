@@ -7,11 +7,20 @@ import {
   HttpStatus,
   Param,
   Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { CartService } from './carts.service';
 import { AddToCartDto } from './dto/cart.dto';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import { RoleEnum } from '../../utils/enum';
+import { Roles } from '../roles/roles.decorator';
+import { RolesGuard } from '../roles/roles.guard';
 
+@ApiBearerAuth()
+@Roles(RoleEnum.USER)
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 @ApiTags('Cart')
 @Controller({
   path: 'cart',
@@ -19,25 +28,25 @@ import { ApiBody, ApiTags } from '@nestjs/swagger';
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
-  @Post('/:userId')
+  @Post()
   @HttpCode(HttpStatus.CREATED)
-  async addToCart(@Param('userId') userId: string, @Body() dto: AddToCartDto) {
+  async addToCart(@Req() req: any, @Body() dto: AddToCartDto) {
+    const userId = req.user.id;
     return await this.cartService.addToCart(Number(userId), dto);
   }
 
-  @Get('/:userId')
+  @Get()
   @HttpCode(HttpStatus.OK)
-  async getCartByUser(@Param('userId') userId: string) {
+  async getCartByUser(@Req() req: any) {
+    const userId = req.user.id;
     return await this.cartService.getCartByUser(Number(userId));
   }
 
-  @Post('import/:userId')
+  @Post('import')
   @HttpCode(HttpStatus.CREATED)
   @ApiBody({ type: AddToCartDto, isArray: true })
-  async addManyToCart(
-    @Param('userId') userId: string,
-    @Body() dto: AddToCartDto[],
-  ) {
+  async addManyToCart(@Req() req: any, @Body() dto: AddToCartDto[]) {
+    const userId = req.user.id;
     return await this.cartService.addManyToCart(Number(userId), dto);
   }
 

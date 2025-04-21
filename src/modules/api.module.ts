@@ -10,6 +10,8 @@ import { CartsModule } from './carts/carts.module';
 import { HealthModule } from './health/health.module';
 import { VouchersModule } from './voucher/voucher.module';
 import { PaymentGatewayModule } from './payment-gateway/payment-gateway.module';
+import { OrdersModule } from './orders/orders.module';
+import { WssModule } from './wss/wss.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { PaymentGatewayModule } from './payment-gateway/payment-gateway.module';
     HealthModule,
     VouchersModule,
     PaymentGatewayModule,
+    OrdersModule,
+    WssModule,
   ],
 })
 export class ApiModule {}

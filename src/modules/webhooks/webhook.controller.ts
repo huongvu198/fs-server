@@ -1,6 +1,13 @@
-import { Controller, Post, Body, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Logger,
+  BadRequestException,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BankTransaction } from './interface/webhook.interface';
+import { decodeOrderCode } from '../../utils/helpers/common.helper';
 
 @ApiTags('Webhooks')
 @Controller('webhooks')
@@ -19,5 +26,7 @@ export class WebhookController {
 
     Logger.log('data', data);
     //TODO: something
+
+    const { userId, createdAt, code } = decodeOrderCode(data.content);
   }
 }

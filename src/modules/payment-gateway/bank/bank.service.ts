@@ -98,4 +98,20 @@ export class BankService {
     await this.bankRepository.save(bank); // cập nhật trạng thái isActive trước
     return await this.bankRepository.softDelete(id); // soft delete bằng id
   }
+
+  async getBankWithFurthestLastOrder() {
+    const bank = await this.bankRepository.findOne({
+      where: { isActive: true },
+      order: { lastOrder: 'ASC' },
+    });
+
+    if (!bank) {
+      return null;
+    }
+
+    bank.lastOrder = new Date();
+    await this.bankRepository.save(bank);
+
+    return bank;
+  }
 }

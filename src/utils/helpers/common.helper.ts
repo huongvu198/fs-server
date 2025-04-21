@@ -41,3 +41,53 @@ export function splitFullName(fullName: string): {
 export function joinFullName(lastName: string, firstName: string): string {
   return `${lastName} ${firstName}`.trim();
 }
+
+export function generateOrderCode(
+  userId: number,
+  createdAt: Date,
+  code: string,
+): string {
+  const timestamp = createdAt
+    .toISOString()
+    .replace(/[-:TZ.]/g, '')
+    .slice(0, 14);
+
+  return `FS${timestamp}${userId.toString()}${code}`;
+}
+
+export function generateRandomCode(length: number = 6): string {
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    result += characters.charAt(randomIndex);
+  }
+
+  return result;
+}
+
+export function decodeOrderCode(orderCode: string) {
+  // Kiểm tra mã có đúng định dạng hay không (bắt đầu với 'FS')
+  if (!orderCode.startsWith('FS')) {
+    throw new Error('Invalid order code format');
+  }
+
+  // Lấy timestamp từ chuỗi (14 ký tự sau 'FS')
+  const timestamp = orderCode.slice(2, 16);
+
+  // Lấy phần còn lại, tách userId và code
+  const remainingCode = orderCode.slice(16);
+
+  // Phần còn lại là userId + code. Giả sử code luôn có 6 ký tự.
+  const userIdLength = remainingCode.length - 6; // Phần còn lại là userId + code (6 ký tự code)
+  const userId = parseInt(remainingCode.slice(0, userIdLength), 10);
+  const code = remainingCode.slice(userIdLength);
+
+  return {
+    createdAt: timestamp, // Thời gian tạo đơn hàng (yyyyMMddHHmmss)
+    userId, // userId đã mã hóa
+    code, // Mã ngẫu nhiên đã được thêm vào
+  };
+}
