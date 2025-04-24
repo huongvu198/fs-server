@@ -17,6 +17,7 @@ export class UserMapper {
       socialId: raw.socialId,
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
+      point: raw.point,
       role: raw.role ? { id: raw.role.id, name: raw.role.name } : null,
       status: raw.status ? { id: raw.status.id, name: raw.status.name } : null,
       addresses: raw.addresses

@@ -15,4 +15,9 @@ export class CreateOrderDto {
   @ApiProperty()
   @IsEnum(PaymentMethodEnum)
   paymentMethod: PaymentMethodEnum;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  point?: string;
 }

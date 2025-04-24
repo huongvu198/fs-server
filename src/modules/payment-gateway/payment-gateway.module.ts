@@ -9,15 +9,22 @@ import { BankService } from './bank/bank.service';
 import { BankController } from './bank/bank.controller';
 import { BankEntity } from 'src/entities/banks.entity';
 import { PaginationHeaderHelper } from 'src/utils/pagination/pagination.helper';
+import { TransactionsService } from './transactions/transaction.service';
+import { TransactionBankEntity } from '../../entities/transactions.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([BankEntity]),
+    TypeOrmModule.forFeature([BankEntity, TransactionBankEntity]),
     ConfigModule.forRoot({ isGlobal: true }),
     HttpModule,
   ],
   controllers: [VietQRController, BankController],
-  exports: [VietQRService, BankService],
-  providers: [VietQRService, BankService, PaginationHeaderHelper],
+  exports: [VietQRService, BankService, TransactionsService],
+  providers: [
+    VietQRService,
+    BankService,
+    TransactionsService,
+    PaginationHeaderHelper,
+  ],
 })
 export class PaymentGatewayModule {}

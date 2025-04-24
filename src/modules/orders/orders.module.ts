@@ -9,6 +9,8 @@ import { OrderController } from './orders.controller';
 import { OrdersService } from './orders.service';
 import { PaymentGatewayModule } from '../payment-gateway/payment-gateway.module';
 import { WssModule } from '../wss/wss.module';
+import { PaginationHeaderHelper } from '../../utils/pagination/pagination.helper';
+import { ProductsModule } from '../products/products.module';
 
 @Module({
   imports: [
@@ -18,9 +20,10 @@ import { WssModule } from '../wss/wss.module';
     CartsModule,
     PaymentGatewayModule,
     WssModule,
+    ProductsModule,
   ],
   controllers: [OrderController],
-  providers: [OrdersService],
+  providers: [OrdersService, PaginationHeaderHelper],
   exports: [OrdersService],
 })
 export class OrdersModule {}

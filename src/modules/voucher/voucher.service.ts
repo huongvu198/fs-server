@@ -52,9 +52,15 @@ export class VouchersService {
     return saved;
   }
 
-  async useVoucher(userId: number, code: string) {
+  async useVoucher(userId: number, codeOrId: string) {
+    const whereConditions: any[] = [{ code: codeOrId }];
+
+    if (isUUID(codeOrId)) {
+      whereConditions.push({ id: codeOrId });
+    }
+
     const voucher = await this.voucherRepo.findOne({
-      where: { code },
+      where: whereConditions,
       relations: ['voucherUsers'],
     });
 
@@ -382,5 +388,27 @@ export class VouchersService {
 
     Object.assign(voucher, dto);
     return await this.voucherRepo.save(voucher);
+  }
+
+  async refundVoucher(userId: number, voucherId: string) {
+    const voucher = await this.voucherRepo.findOne({
+      where: { id: voucherId },
+      relations: ['voucherUsers'],
+    });
+
+    if (!voucher) {
+      throw new NotFoundException('Voucher không tồn tại');
+    }
+
+    await this.voucherUserRepo.update(
+      {
+        voucher: { id: voucherId },
+        user: { id: userId },
+        isUsed: true,
+      },
+      {
+        isUsed: false,
+      },
+    );
   }
 }

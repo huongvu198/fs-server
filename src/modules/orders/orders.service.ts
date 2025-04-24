@@ -2,15 +2,17 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderItemEntity } from 'src/entities/order-items.entity';
 import { OrderEntity } from 'src/entities/orders.entity';
-import { LessThan, Repository } from 'typeorm';
+import { In, LessThan, Repository } from 'typeorm';
 import { CreateOrderDto } from './dto/order.dto';
 import { CartService } from '../carts/carts.service';
 import { VouchersService } from '../voucher/voucher.service';
 import {
   DiscountType,
+  InventoryModeEnum,
   OrderStatusEnum,
   PaymentMethodEnum,
   PaymentStatusEnum,
+  PointModeEnum,
 } from '../../utils/enum';
 import { OrderItemMapper } from './order-items.mapper';
 import { BankService } from '../payment-gateway/bank/bank.service';
@@ -21,6 +23,11 @@ import {
 } from '../../utils/helpers/common.helper';
 import { config } from '../../config/app.config';
 import { SocketGateway } from '../wss/socket.gateway';
+import { PaginationHeaderHelper } from '../../utils/pagination/pagination.helper';
+import { IPagination } from '../../utils/pagination/pagination.interface';
+import { TransactionBankEntity } from '../../entities/transactions.entity';
+import { InventoryHelper } from 'src/modules/products/inventory.helper';
+import { UsersService } from '../users/users.service';
 const { term } = config.payment;
 
 @Injectable()
@@ -36,6 +43,9 @@ export class OrdersService {
     private readonly bankService: BankService,
     private readonly vietQRService: VietQRService,
     private readonly socketGateway: SocketGateway,
+    private readonly paginationHeaderHelper: PaginationHeaderHelper,
+    private readonly inventoryHelper: InventoryHelper,
+    private readonly usersService: UsersService,
   ) {}
 
   async createOrder(cartId: string, userId: number, dto: CreateOrderDto) {
@@ -56,6 +66,10 @@ export class OrdersService {
       if (voucher.available) {
         discount = voucher.discount;
         type = voucher.type!;
+        this.vouchersService.useVoucher(userId, dto.voucherId);
+      }
+      if (!voucher.available) {
+        throw new BadRequestException(voucher.message);
       }
     }
 
@@ -71,7 +85,18 @@ export class OrdersService {
       discountAmount = (subtotal * discount) / 100;
     }
 
-    const total = subtotal - discountAmount;
+    let pointDiscount = 0;
+
+    if (dto.point) {
+      pointDiscount = Number(dto.point);
+      await this.usersService.updatePoint(
+        userId,
+        pointDiscount,
+        PointModeEnum.SUBTRACT,
+      );
+    }
+
+    const total = subtotal - discountAmount - pointDiscount;
 
     const order = await this.orderRepository.save({
       userId,
@@ -95,6 +120,10 @@ export class OrdersService {
     const orderItems = OrderItemMapper.toEntityList(cart.items, order);
     await this.orderItemsRepository.save(orderItems);
     await this.cartService.deleteAllCartItem(cartId);
+    await this.inventoryHelper.updateInventoryQuantities(
+      orderItems,
+      InventoryModeEnum.DECREASE,
+    );
 
     switch (dto.paymentMethod) {
       case PaymentMethodEnum.BANKING: {
@@ -109,7 +138,12 @@ export class OrdersService {
           amount: Number(total),
           addInfo: generateOrderCode(order.userId, order.createdAt, order.code),
         });
-        this.startPaymentCountdown(order);
+        this.startPaymentCountdown(order, orderItems, pointDiscount);
+        console.log(
+          'MessagePayment',
+          ` ${generateOrderCode(order.userId, order.createdAt, order.code)} | 
+          amount : ${Number(total)} `,
+        );
         return {
           type: PaymentMethodEnum.BANKING,
           order,
@@ -118,7 +152,6 @@ export class OrdersService {
       }
 
       case PaymentMethodEnum.COD: {
-        this.vouchersService.useVoucher(userId, dto.voucherId);
         return {
           type: PaymentMethodEnum.COD,
           order,
@@ -132,13 +165,31 @@ export class OrdersService {
     }
   }
 
-  private startPaymentCountdown(order: OrderEntity): void {
+  private startPaymentCountdown(
+    order: OrderEntity,
+    orderItems: OrderItemEntity[],
+    pointDiscount: number,
+  ): void {
     const now = new Date();
     const expiryTime = new Date(order.paymentExpiredAt);
     const timeRemaining = expiryTime.getTime() - now.getTime();
 
     setTimeout(async () => {
       await this.cancelOrder(order);
+      await this.inventoryHelper.updateInventoryQuantities(
+        orderItems,
+        InventoryModeEnum.INCREASE,
+      );
+      if (order.voucherId) {
+        await this.vouchersService.refundVoucher(order.userId, order.voucherId);
+      }
+      if (pointDiscount !== 0) {
+        await this.usersService.updatePoint(
+          order.userId,
+          pointDiscount,
+          PointModeEnum.ADD,
+        );
+      }
       this.socketGateway.sendPaymentExpiredNotification(order.userId, order.id);
     }, timeRemaining);
   }
@@ -170,5 +221,86 @@ export class OrdersService {
     }
 
     return expiredOrders.length;
+  }
+
+  async getOrderByUserId(userId: number, pagination: IPagination) {
+    const [orders, total] = await this.orderRepository.findAndCount({
+      where: { user: { id: userId } },
+      relations: ['items', 'voucher', 'address', 'transactions'],
+      skip: pagination.startIndex,
+      take: pagination.perPage,
+      order: { createdAt: 'DESC' },
+    });
+
+    const responseHeaders = this.paginationHeaderHelper.getHeaders(
+      pagination,
+      total,
+    );
+
+    return { headers: responseHeaders, items: orders };
+  }
+
+  async manualOrderCancellation(orderId: string) {
+    const order = await this.orderRepository.findOne({
+      where: {
+        id: orderId,
+        status: In([OrderStatusEnum.PROCESSING, OrderStatusEnum.PENDING]),
+      },
+      relations: ['items'],
+    });
+
+    if (!order) {
+      throw new BadRequestException('Đơn hàng không tồn tại');
+    }
+
+    await this.inventoryHelper.updateInventoryQuantities(
+      order.items,
+      InventoryModeEnum.INCREASE,
+    );
+
+    order.status = OrderStatusEnum.CANCELLED;
+    await this.orderRepository.save(order);
+
+    if (
+      order.paymentStatus === PaymentStatusEnum.PAID &&
+      order.paymentMethod === PaymentMethodEnum.BANKING
+    ) {
+      order.paymentStatus = PaymentStatusEnum.REFUNDED;
+      const pointRefund = Number(order.total);
+      await this.usersService.updatePoint(
+        order.userId,
+        pointRefund,
+        PointModeEnum.ADD,
+      );
+      await this.orderRepository.save(order);
+    }
+
+    return order;
+  }
+
+  async handlePaymentOrder(
+    userId: number,
+    code: string,
+    transactionId: string,
+    transaction: TransactionBankEntity,
+  ) {
+    const order = await this.orderRepository.findOneBy({
+      userId,
+      code,
+    });
+
+    if (!order) {
+      Logger.warn('Order not found');
+      return;
+    }
+
+    order.transactionId = transactionId;
+    order.transactions = transaction;
+    order.status = OrderStatusEnum.PROCESSING;
+    order.paymentStatus = PaymentStatusEnum.PAID;
+
+    await this.orderRepository.save(order);
+
+    await this.socketGateway.sendOrderPaidNotification(order.userId, order);
   }
 }

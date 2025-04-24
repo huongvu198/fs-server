@@ -6,6 +6,7 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { SocketEvent } from './wss.enum';
+import { OrderEntity } from 'src/entities/orders.entity';
 
 @WebSocketGateway({
   cors: {
@@ -22,6 +23,12 @@ export class SocketGateway implements OnGatewayConnection {
     this.server
       .to(`user_${userId}`)
       .emit(SocketEvent.ORDER_PAYMENT_EXPIRED, { orderId });
+  }
+
+  sendOrderPaidNotification(userId: number, order: OrderEntity) {
+    this.server
+      .to(`user_${userId}`)
+      .emit(SocketEvent.PAYMENT_SUCCESSFUL, { order });
   }
 
   // (Optional) Kết nối và join vào room userId

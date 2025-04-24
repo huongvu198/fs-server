@@ -98,4 +98,15 @@ export class UsersController {
   createByAdmin(@Body() dto: CreateUserByAdminDto) {
     return this.usersService.createByAdmin(dto);
   }
+
+  @Get(':id/point')
+  @HttpCode(HttpStatus.OK)
+  @ApiParam({
+    name: 'id',
+    type: String,
+    required: true,
+  })
+  getPoint(@Param('id') id: string) {
+    return this.usersService.getPoint(Number(id));
+  }
 }

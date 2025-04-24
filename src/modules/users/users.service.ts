@@ -18,6 +18,7 @@ import {
   replaceQuerySearch,
   splitFullName,
 } from '../../utils/helpers/common.helper';
+import { PointModeEnum } from 'src/utils/enum';
 
 @Injectable()
 export class UsersService {
@@ -179,5 +180,32 @@ export class UsersService {
 
   async findAll() {
     return await this.usersRepository.find();
+  }
+
+  async updatePoint(userId: number, point: number, mode: PointModeEnum) {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new BadRequestException(Errors.USER_NOT_FOUND);
+    }
+
+    if (mode === PointModeEnum.SUBTRACT) {
+      if (user.point < point) {
+        throw new BadRequestException('Không đủ điểm để sử dụng');
+      }
+      user.point -= point;
+    } else if (mode === PointModeEnum.ADD) {
+      user.point += point;
+    }
+
+    await this.usersRepository.save(user);
+  }
+
+  async getPoint(userId: number) {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException(Errors.USER_NOT_FOUND);
+    }
+    return user.point;
   }
 }

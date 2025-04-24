@@ -12,6 +12,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { SubCategoriesModule } from './subcategories/subcategories.module';
 import { ProductsPublicController } from './products.public.controller';
 import { ProductsService } from './products.service';
+import { InventoryHelper } from './inventory.helper';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { ProductsService } from './products.service';
     SubCategoriesModule,
   ],
   controllers: [ProductsController, ProductsPublicController],
-  providers: [PaginationHeaderHelper, ProductsService],
-  exports: [ProductsService],
+  providers: [PaginationHeaderHelper, ProductsService, InventoryHelper],
+  exports: [ProductsService, InventoryHelper],
 })
 export class ProductsModule {}

@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -16,6 +18,11 @@ import { Roles } from '../roles/roles.decorator';
 import { RolesGuard } from '../roles/roles.guard';
 import { CartService } from '../carts/carts.service';
 import { CreateOrderDto } from './dto/order.dto';
+import {
+  ApiPagination,
+  IPagination,
+} from '../../utils/pagination/pagination.interface';
+import { Pagination } from '../../utils/pagination/pagination.decorator';
 
 @ApiBearerAuth()
 @Roles(RoleEnum.USER)
@@ -37,5 +44,22 @@ export class OrderController {
     const userId = req.user.id;
     const cartId = await this.cartService.getCartIdByUserId(Number(userId));
     return await this.ordersService.createOrder(cartId, userId, dto);
+  }
+
+  @Get('history')
+  @ApiPagination()
+  @HttpCode(HttpStatus.OK)
+  async getOrdersByUser(
+    @Req() req: any,
+    @Pagination() pagination: IPagination,
+  ) {
+    const userId = req.user.id;
+    return await this.ordersService.getOrderByUserId(userId, pagination);
+  }
+
+  @Patch('cancel/:orderId')
+  @HttpCode(HttpStatus.OK)
+  async manualOrderCancellation(@Param('orderId') orderId: string) {
+    return await this.ordersService.manualOrderCancellation(orderId);
   }
 }

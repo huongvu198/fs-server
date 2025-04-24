@@ -86,8 +86,21 @@ export function decodeOrderCode(orderCode: string) {
   const code = remainingCode.slice(userIdLength);
 
   return {
-    createdAt: timestamp, // Thời gian tạo đơn hàng (yyyyMMddHHmmss)
+    createdAt: parseTimestampISO(timestamp).toISOString(), // Thời gian tạo đơn hàng (yyyyMMddHHmmss)
     userId, // userId đã mã hóa
     code, // Mã ngẫu nhiên đã được thêm vào
   };
+}
+
+export function parseTimestampISO(ts: string): Date {
+  if (!/^\d{14}$/.test(ts)) {
+    throw new Error(`Invalid timestamp format: ${ts}`);
+  }
+  // Turn "YYYYMMDDhhmmss" → "YYYY-MM-DDThh:mm:ssZ"
+  const iso = ts.replace(
+    /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/,
+    '$1-$2-$3T$4:$5:$6Z',
+  );
+
+  return new Date(iso);
 }

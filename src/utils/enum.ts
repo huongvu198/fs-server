@@ -55,3 +55,13 @@ export enum PaymentStatusEnum {
   REFUNDED = 'REFUNDED',
   UNPAID = 'UNPAID',
 }
+
+export enum InventoryModeEnum {
+  DECREASE = 'DECREASE',
+  INCREASE = 'INCREASE',
+}
+
+export enum PointModeEnum {
+  ADD = 'ADD',
+  SUBTRACT = 'SUBTRACT',
+}

@@ -7,12 +7,13 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  OneToOne,
 } from 'typeorm';
 import { UserEntity } from './users.entity';
 import { UserAddressEntity } from './user-address.entity';
 import { VoucherEntity } from './voucher.entity';
 import { OrderItemEntity } from './order-items.entity';
-import { TransactionEntity } from './transactions.entity';
+import { TransactionBankEntity } from './transactions.entity';
 import {
   OrderStatusEnum,
   PaymentMethodEnum,
@@ -83,8 +84,8 @@ export class OrderEntity {
   })
   items: OrderItemEntity[];
 
-  @OneToMany(() => TransactionEntity, (transaction) => transaction.order)
-  transactions: TransactionEntity[];
+  @OneToOne(() => TransactionBankEntity, (transaction) => transaction.order)
+  transactions: TransactionBankEntity;
 
   @Column({ nullable: true })
   transactionId: string;

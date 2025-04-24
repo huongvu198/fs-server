@@ -12,6 +12,7 @@ import { VouchersModule } from './voucher/voucher.module';
 import { PaymentGatewayModule } from './payment-gateway/payment-gateway.module';
 import { OrdersModule } from './orders/orders.module';
 import { WssModule } from './wss/wss.module';
+import { WebhookMudule } from './webhooks/webhook.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { WssModule } from './wss/wss.module';
     PaymentGatewayModule,
     OrdersModule,
     WssModule,
+    WebhookMudule,
   ],
 })
 export class ApiModule {}

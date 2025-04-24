@@ -6,8 +6,10 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToOne,
 } from 'typeorm';
 import { OrderEntity } from './orders.entity';
+import { EntityRelationalHelper } from '../utils/relational-entity-helper';
 
 export enum TransactionStatusEnum {
   PENDING = 'pending',
@@ -17,22 +19,22 @@ export enum TransactionStatusEnum {
 }
 
 @Entity({ name: 'transactions' })
-export class TransactionEntity {
+export class TransactionBankEntity extends EntityRelationalHelper {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ nullable: false })
   transactionId: string;
 
   @Column({ type: 'jsonb', nullable: false })
   data: Record<string, any>;
 
-  @Column()
-  orderId: string;
+  @Column({ nullable: true })
+  orderId?: string;
 
-  @ManyToOne(() => OrderEntity)
+  @OneToOne(() => OrderEntity, { nullable: true })
   @JoinColumn({ name: 'orderId' })
-  order: OrderEntity;
+  order?: OrderEntity;
 
   @Column({
     type: 'enum',
@@ -40,9 +42,6 @@ export class TransactionEntity {
     default: TransactionStatusEnum.PENDING,
   })
   status: TransactionStatusEnum;
-
-  @Column({ nullable: true })
-  description: string;
 
   @CreateDateColumn()
   createdAt: Date;
