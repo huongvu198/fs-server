@@ -10,16 +10,18 @@ import {
   Query,
   Patch,
   NotFoundException,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { CreateUserByAdminDto, CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiParam, ApiTags } from '@nestjs/swagger';
-// import { Roles } from '../roles/roles.decorator';
-// import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Roles } from '../roles/roles.decorator';
+import { AuthGuard } from '@nestjs/passport';
 
 import { UsersService } from './users.service';
-// import { RolesGuard } from '../roles/roles.guard';
-// import { RoleEnum } from '../../utils/enum';
+import { RolesGuard } from '../roles/roles.guard';
+import { RoleEnum } from '../../utils/enum';
 import { UserMapper } from './users.mappers';
 import {
   ApiPagination,
@@ -29,9 +31,9 @@ import { FilterUserDto } from './dto/query-user.dto';
 import { Pagination } from '../../utils/pagination/pagination.decorator';
 import { Errors } from '../../errors/errors';
 
-// @ApiBearerAuth()
-// @Roles(RoleEnum.ADMIN)
-// @UseGuards(AuthGuard('jwt'), RolesGuard)
+@ApiBearerAuth()
+@Roles(RoleEnum.ADMIN, RoleEnum.USER)
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 @ApiTags('Users')
 @Controller({
   path: 'users',
@@ -65,6 +67,23 @@ export class UsersController {
   })
   async findOne(@Param('id') id: string) {
     const user = await this.usersService.findById(Number(id));
+    if (!user) {
+      throw new NotFoundException(Errors.USER_NOT_FOUND);
+    }
+    return UserMapper.toDomain(user);
+  }
+
+  @Patch('me')
+  @HttpCode(HttpStatus.OK)
+  async updateProfile(
+    @Req() req: any,
+    @Body() updateProfileDto: UpdateUserDto,
+  ) {
+    const userId = req.user.id;
+    const user = await this.usersService.update(
+      Number(userId),
+      updateProfileDto,
+    );
     if (!user) {
       throw new NotFoundException(Errors.USER_NOT_FOUND);
     }
