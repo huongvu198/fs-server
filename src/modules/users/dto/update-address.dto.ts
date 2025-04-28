@@ -7,6 +7,11 @@ import {
 } from 'class-validator';
 
 export class UpdateAddressDto {
+  @ApiPropertyOptional({ example: 'Vu Thi Huong', type: String })
+  @IsOptional()
+  @IsString()
+  fullName?: string;
+
   @ApiPropertyOptional({ example: '0909876543', type: String })
   @IsOptional()
   @IsString()

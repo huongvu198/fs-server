@@ -4,9 +4,15 @@ import {
   IsBoolean,
   IsOptional,
   IsPhoneNumber,
+  IsNotEmpty,
 } from 'class-validator';
 
 export class CreateAddressDto {
+  @ApiProperty({ example: 'Vu Thi Huong', type: String })
+  @IsString()
+  @IsNotEmpty()
+  fullName: string;
+
   @ApiProperty({ example: '0901234567', type: String })
   @IsString()
   @IsPhoneNumber('VN')

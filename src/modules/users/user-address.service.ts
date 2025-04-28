@@ -5,6 +5,7 @@ import { UserAddressEntity } from 'src/entities/user-address.entity';
 import { UserEntity } from 'src/entities/users.entity';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
+import { UserAddressMapper } from './user-address.mapper';
 
 @Injectable()
 export class UserAddressService {
@@ -21,33 +22,38 @@ export class UserAddressService {
     if (!user) throw new NotFoundException('User not found');
 
     const address = this.addressRepo.create({ ...dto, user });
-    return this.addressRepo.save(address);
+    await this.addressRepo.save(address);
+
+    return await this.getAddressAllWithRelations(userId);
   }
 
   async update(addressId: string, dto: UpdateAddressDto) {
     const address = await this.addressRepo.findOne({
       where: { id: addressId },
+      relations: ['user'],
     });
-    if (!address) throw new NotFoundException('Address not found');
+    if (!address) throw new NotFoundException('Địa chỉ không tồn tại');
 
     Object.assign(address, dto);
-    return this.addressRepo.save(address);
+    await this.addressRepo.save(address);
+
+    return await this.getAddressAllWithRelations(address.user.id);
   }
 
   async delete(addressId: string) {
     const address = await this.addressRepo.findOne({
       where: { id: addressId },
+      relations: ['user'],
     });
-    if (!address) throw new NotFoundException('Address not found');
+    if (!address) throw new NotFoundException('Địa chỉ không tồn tại');
 
-    return this.addressRepo.softDelete(addressId);
+    await this.addressRepo.softDelete(addressId);
+
+    return await this.getAddressAllWithRelations(address.user.id);
   }
 
   async getUserAddresses(userId: number) {
-    return this.addressRepo.find({
-      where: { user: { id: userId } },
-      order: { isDefault: 'DESC', createdAt: 'DESC' },
-    });
+    return await this.getAddressAllWithRelations(userId);
   }
 
   async setDefault(userId: number, addressId: string) {
@@ -56,6 +62,20 @@ export class UserAddressService {
       { isDefault: false },
     );
 
-    return this.addressRepo.update({ id: addressId }, { isDefault: true });
+    await this.addressRepo.update({ id: addressId }, { isDefault: true });
+
+    return await this.getAddressAllWithRelations(userId);
+  }
+
+  async getAddressAllWithRelations(userId: number) {
+    const addresses = await this.addressRepo.find({
+      where: { user: { id: userId } },
+      relations: ['user'],
+      order: { createdAt: 'DESC' },
+    });
+
+    if (!addresses) throw new NotFoundException('Địa chỉ không tồn tại');
+
+    return UserAddressMapper.toResponse(addresses);
   }
 }

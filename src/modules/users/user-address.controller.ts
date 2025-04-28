@@ -36,7 +36,7 @@ export class UserAddressController {
     return this.userAddressService.create(Number(userId), dto);
   }
 
-  @Put('address/:id')
+  @Patch('address/:id')
   update(@Param('id') id: string, @Body() dto: UpdateAddressDto) {
     return this.userAddressService.update(id, dto);
   }
