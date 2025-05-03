@@ -17,6 +17,9 @@ export class UserAddressEntity extends EntityRelationalHelper {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ type: String, nullable: true })
+  fullName: string;
+
   @Column({ type: String, nullable: false })
   phone: string;
 

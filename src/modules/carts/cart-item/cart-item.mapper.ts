@@ -31,6 +31,10 @@ export class CartItemMapper {
       variant: {
         id: item.variant.id,
         color: item.variant.color,
+        image:
+          item.variant?.images && item.variant.images.length > 0
+            ? item.variant.images[0]?.url
+            : null,
       },
       size: {
         id: item.size.id,

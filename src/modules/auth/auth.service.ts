@@ -32,6 +32,7 @@ import { AuthVerifyEmailDto } from './dto/auth-confirm-email.dto';
 import dayjs from 'dayjs';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { RedisCacheService } from '../../utils/redis-cache/redis-cache.service';
+import { UserMapper } from '../users/users.mappers';
 
 @Injectable()
 export class AuthService {
@@ -269,5 +270,14 @@ export class AuthService {
       refreshToken,
       tokenExpires,
     };
+  }
+
+  async getProfile(userId: number) {
+    const user = await this.usersService.findByIdWithRelations(userId);
+    if (!user) {
+      throw new NotFoundException('Người dùng không tồn tại');
+    }
+
+    return UserMapper.toDomain(user);
   }
 }

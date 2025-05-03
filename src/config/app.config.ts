@@ -63,4 +63,15 @@ export const config = {
     apiKey: env.CLOUDINARY_API_KEY,
     apiSecret: env.CLOUDINARY_API_SECRET,
   },
+  vietQR: {
+    clientId: env.VIETQR_CLIENT_ID,
+    apiKey: env.VIETQR_API_KEY,
+    baseUrl: env.VIETQR_BASE_URL ?? 'https://api.vietqr.io/v2/generate',
+  },
+  security: {
+    key: env.SECURITY_KEY ?? '',
+  },
+  payment: {
+    term: env.PAYMENT_TERM ?? Number(15),
+  },
 };

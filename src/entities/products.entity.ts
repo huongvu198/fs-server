@@ -14,6 +14,7 @@ import { SegmentEntity } from './segments.entity';
 import { CategoryEntity } from './categories.entity';
 import { SubCategoryEntity } from './sub-categories.entity';
 import { VariantEntity } from './variants.entity';
+import { ProductReviewEntity } from './product-review.entity';
 
 @Entity({
   name: 'products',
@@ -72,6 +73,15 @@ export class ProductEntity extends EntityRelationalHelper {
 
   @OneToMany(() => VariantEntity, (variant) => variant.product)
   variants: VariantEntity[];
+
+  @Column({ type: 'decimal', precision: 2, scale: 1, default: 0 })
+  averageRating: number; // Điểm đánh giá trung bình
+
+  @Column({ default: 0 })
+  totalReviews: number; // Tổng số đánh giá
+
+  @OneToMany(() => ProductReviewEntity, (review) => review.product)
+  reviews: ProductReviewEntity[];
 
   @CreateDateColumn()
   createdAt: Date;

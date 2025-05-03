@@ -13,6 +13,7 @@ import { IPagination } from 'src/utils/pagination/pagination.interface';
 import { PaginationHeaderHelper } from 'src/utils/pagination/pagination.helper';
 import { replaceQuerySearch } from 'src/utils/helpers/common.helper';
 import removeAccents from 'remove-accents';
+import { isUUID } from 'class-validator';
 
 @Injectable()
 export class VouchersService {
@@ -51,9 +52,15 @@ export class VouchersService {
     return saved;
   }
 
-  async applyVoucher(userId: number, code: string) {
+  async useVoucher(userId: number, codeOrId: string) {
+    const whereConditions: any[] = [{ code: codeOrId }];
+
+    if (isUUID(codeOrId)) {
+      whereConditions.push({ id: codeOrId });
+    }
+
     const voucher = await this.voucherRepo.findOne({
-      where: { code },
+      where: whereConditions,
       relations: ['voucherUsers'],
     });
 
@@ -106,6 +113,96 @@ export class VouchersService {
     }
 
     return { success: true, discount: voucher.discount };
+  }
+
+  async applyVoucher(userId: number, codeOrId: string) {
+    const whereConditions: any[] = [{ code: codeOrId }];
+
+    if (isUUID(codeOrId)) {
+      whereConditions.push({ id: codeOrId });
+    }
+
+    const voucher = await this.voucherRepo.findOne({
+      where: whereConditions,
+      relations: ['voucherUsers'],
+    });
+
+    if (!voucher) {
+      return {
+        available: false,
+        discount: 0,
+        type: null,
+        id: null,
+        message: 'Voucher không tồn tại',
+      };
+    }
+    if (!voucher.isActive) {
+      return {
+        available: false,
+        discount: 0,
+        type: voucher.type,
+        id: voucher.id,
+        message: 'Voucher không hoạt động',
+      };
+    }
+    const now = new Date();
+    if (now < voucher.startDate || now > voucher.endDate) {
+      return {
+        available: false,
+        discount: 0,
+        type: voucher.type,
+        id: voucher.id,
+        message: 'Voucher hết hạn hoặc chưa bắt đầu',
+      };
+    }
+
+    const user = await this.usersService.findById(userId);
+    if (!user) throw new BadRequestException('User không hợp lệ');
+
+    // Kiểm tra nếu đã từng sử dụng voucher này
+    const existed = await this.voucherUserRepo.findOne({
+      where: {
+        user: { id: userId },
+        voucher: { id: voucher.id },
+      },
+    });
+
+    if (existed) {
+      if (existed.isUsed) {
+        return {
+          available: false,
+          discount: 0,
+          type: voucher.type,
+          id: voucher.id,
+          message: 'Bạn đã sử dụng voucher này rồi',
+        };
+      }
+    } else {
+      // Nếu là voucher limit → kiểm tra số lượng và đánh dấu đã dùng
+      if (voucher.quantity) {
+        const usedCount = await this.voucherUserRepo.count({
+          where: { voucher: { id: voucher.id }, isUsed: true },
+        });
+
+        if (usedCount >= voucher.quantity) {
+          return {
+            available: false,
+            discount: 0,
+            type: voucher.type,
+            id: voucher.id,
+            message: 'Voucher đã hết lượt sử dụng',
+          };
+        }
+      }
+    }
+
+    return {
+      available: true,
+      discount: voucher.discount,
+      type: voucher.type,
+      id: voucher.id,
+      message: 'Voucher hợp lệ',
+    };
   }
 
   async getVoucherByCode(userId: number, code: string) {
@@ -291,5 +388,27 @@ export class VouchersService {
 
     Object.assign(voucher, dto);
     return await this.voucherRepo.save(voucher);
+  }
+
+  async refundVoucher(userId: number, voucherId: string) {
+    const voucher = await this.voucherRepo.findOne({
+      where: { id: voucherId },
+      relations: ['voucherUsers'],
+    });
+
+    if (!voucher) {
+      throw new NotFoundException('Voucher không tồn tại');
+    }
+
+    await this.voucherUserRepo.update(
+      {
+        voucher: { id: voucherId },
+        user: { id: userId },
+        isUsed: true,
+      },
+      {
+        isUsed: false,
+      },
+    );
   }
 }

@@ -22,7 +22,7 @@ export class CategoryEntity extends EntityRelationalHelper {
   @Column({ type: String, nullable: false })
   name: string;
 
-  @Column({ type: String, nullable: false, unique: true })
+  @Column({ type: String, nullable: false })
   cateSlug: string;
 
   @Column({ type: Boolean, default: true })

@@ -8,6 +8,8 @@ import {
   UseGuards,
   Delete,
   SerializeOptions,
+  Get,
+  Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
@@ -18,6 +20,7 @@ import { AuthResetPasswordDto } from './dto/auth-reset-password.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { UsersService } from '../users/users.service';
 
 @ApiTags('Auth')
 @Controller({
@@ -86,5 +89,14 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   public async delete(@Request() request): Promise<void> {
     return await this.service.softDelete(request.user);
+  }
+
+  @Get('me')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.OK)
+  public async me(@Req() req: any) {
+    const userId = req.user.id;
+    return this.service.getProfile(Number(userId));
   }
 }

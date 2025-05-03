@@ -33,3 +33,35 @@ export enum DiscountType {
   PERCENT = 'PERCENT',
   FIXED = 'FIXED',
 }
+
+export enum OrderStatusEnum {
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  PROCESSING = 'PROCESSING',
+  SHIPPING = 'SHIPPING',
+  DELIVERED = 'DELIVERED',
+  CANCELLED = 'CANCELLED',
+}
+
+export enum PaymentMethodEnum {
+  COD = 'COD',
+  BANKING = 'BANKING',
+}
+
+export enum PaymentStatusEnum {
+  PENDING = 'PENDING',
+  PAID = 'PAID',
+  FAILED = 'FAILED',
+  REFUNDED = 'REFUNDED',
+  UNPAID = 'UNPAID',
+}
+
+export enum InventoryModeEnum {
+  DECREASE = 'DECREASE',
+  INCREASE = 'INCREASE',
+}
+
+export enum PointModeEnum {
+  ADD = 'ADD',
+  SUBTRACT = 'SUBTRACT',
+}

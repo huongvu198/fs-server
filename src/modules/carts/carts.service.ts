@@ -11,7 +11,6 @@ import { ProductsService } from '../products/products.service';
 import { CartItemEntity } from 'src/entities/cart-item.entity';
 import { UsersService } from '../users/users.service';
 import { CartMapper } from './carts.mapper';
-import { CartItemStatusEnum } from 'src/utils/enum';
 
 @Injectable()
 export class CartService {
@@ -54,7 +53,13 @@ export class CartService {
 
     let cart = await this.cartRepository.findOne({
       where: { user: { id: userId } },
-      relations: ['items', 'items.product', 'items.variant', 'items.size'],
+      relations: [
+        'items',
+        'items.product',
+        'items.variant',
+        'items.size',
+        'items.variant.images',
+      ],
     });
 
     if (!cart) {
@@ -134,8 +139,25 @@ export class CartService {
       throw new NotFoundException('Không có sản phẩm trong giỏ hàng để xóa');
     }
 
-    await this.cartItemRepository.remove(cart.items);
+    return await this.cartItemRepository.remove(cart.items);
+  }
 
-    return CartMapper.toDomain(cart);
+  async getCartIdByUserId(userId: number) {
+    const cart = await this.getOrCreateCart(userId);
+
+    return cart.id;
+  }
+
+  async getCartToOrder(cartId: string, userId: number) {
+    return await this.cartRepository.findOne({
+      where: { id: cartId, user: { id: userId } },
+      relations: [
+        'items',
+        'items.product',
+        'items.variant',
+        'items.size',
+        'items.variant.images',
+      ],
+    });
   }
 }
