@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderItemEntity } from 'src/entities/order-items.entity';
 import { OrderEntity } from 'src/entities/orders.entity';
@@ -28,6 +33,7 @@ import { IPagination } from '../../utils/pagination/pagination.interface';
 import { TransactionBankEntity } from '../../entities/transactions.entity';
 import { InventoryHelper } from 'src/modules/products/inventory.helper';
 import { UsersService } from '../users/users.service';
+import { UserAddressService } from '../users/user-address.service';
 const { term } = config.payment;
 
 @Injectable()
@@ -46,6 +52,7 @@ export class OrdersService {
     private readonly paginationHeaderHelper: PaginationHeaderHelper,
     private readonly inventoryHelper: InventoryHelper,
     private readonly usersService: UsersService,
+    private readonly userAddressService: UserAddressService,
   ) {}
 
   async createOrder(cartId: string, userId: number, dto: CreateOrderDto) {
@@ -54,6 +61,10 @@ export class OrdersService {
     if (!cart || !cart.items.length) {
       throw new BadRequestException('Giỏ hàng không hợp lệ hoặc trống');
     }
+
+    const address = await this.userAddressService.findOne(dto.addressId);
+
+    if (!address) throw new NotFoundException('Địa chỉ không tồn tại');
 
     let discount: number = 0;
     let type: DiscountType = DiscountType.FIXED;
@@ -66,7 +77,7 @@ export class OrdersService {
       if (voucher.available) {
         discount = voucher.discount;
         type = voucher.type!;
-        this.vouchersService.useVoucher(userId, dto.voucherId);
+        await this.vouchersService.useVoucher(userId, dto.voucherId);
       }
       if (!voucher.available) {
         throw new BadRequestException(voucher.message);
@@ -74,7 +85,10 @@ export class OrdersService {
     }
 
     const subtotal = cart.items.reduce((sum, item) => {
-      return sum + Number(item.product.price) * item.quantity;
+      const priceAfterDiscount = item.product.discount
+        ? Number(item.product.price) * (1 - Number(item.product.discount) / 100)
+        : Number(item.product.price);
+      return sum + priceAfterDiscount * item.quantity;
     }, 0);
 
     let discountAmount = 0;
@@ -101,6 +115,7 @@ export class OrdersService {
     const order = await this.orderRepository.save({
       userId,
       addressId: dto.addressId,
+      address,
       voucherId: dto.voucherId,
       subtotal,
       discount,
@@ -226,7 +241,14 @@ export class OrdersService {
   async getOrderByUserId(userId: number, pagination: IPagination) {
     const [orders, total] = await this.orderRepository.findAndCount({
       where: { user: { id: userId } },
-      relations: ['items', 'voucher', 'address', 'transactions'],
+      relations: [
+        'items',
+        'voucher',
+        'address',
+        'transactions',
+        'items.product',
+        'items.variant.images',
+      ],
       skip: pagination.startIndex,
       take: pagination.perPage,
       order: { createdAt: 'DESC' },

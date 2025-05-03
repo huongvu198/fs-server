@@ -78,4 +78,12 @@ export class UserAddressService {
 
     return UserAddressMapper.toResponse(addresses);
   }
+
+  async findOne(addressId: string) {
+    const address = await this.addressRepo.findOne({
+      where: { id: addressId },
+    });
+
+    return address;
+  }
 }
