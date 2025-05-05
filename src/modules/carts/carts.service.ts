@@ -88,7 +88,7 @@ export class CartService {
     );
 
     if (existingItem) {
-      existingItem.quantity += item.quantity;
+      existingItem.quantity = item.quantity;
     } else {
       const newItem = this.cartItemRepository.create({
         cart,
