@@ -20,8 +20,6 @@ import { AuthResetPasswordDto } from './dto/auth-reset-password.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
-import { UsersService } from '../users/users.service';
-
 @ApiTags('Auth')
 @Controller({
   path: 'auth',

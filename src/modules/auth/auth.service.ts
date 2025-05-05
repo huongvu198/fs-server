@@ -103,7 +103,7 @@ export class AuthService {
       email: dto.email,
       role: RoleEnum.USER,
       provider: AuthProvidersEnum.EMAIL,
-      status: StatusEnum.INACTIVE,
+      status: StatusEnum.ACTIVE,
     });
 
     const verifyAccount = generateVerifyAccountInfo(
