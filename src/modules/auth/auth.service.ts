@@ -84,7 +84,7 @@ export class AuthService {
       hash,
     });
 
-    const { token, refreshToken, tokenExpires, refeshExprires } =
+    const { token, refreshToken, tokenExpires, refreshExpires } =
       await this.getTokensData({
         id: user.id,
         role: user.role,
@@ -96,7 +96,7 @@ export class AuthService {
       refreshToken,
       token,
       tokenExpires,
-      refeshExprires,
+      refreshExpires,
     };
   }
 
@@ -241,10 +241,10 @@ export class AuthService {
     hash: Session['hash'];
   }) {
     const tokenExpiresIn = config.jwt.expiresIn;
-    const refeshExpriresIn = config.jwt.refreshExpiresIn;
+    const refreshExpiresIn = config.jwt.refreshExpiresIn;
 
     const tokenExpires = Date.now() + ms(tokenExpiresIn);
-    const refeshExprires = Date.now() + ms(refeshExpriresIn);
+    const refreshExpires = Date.now() + ms(refreshExpiresIn);
 
     const [token, refreshToken] = await Promise.all([
       await this.jwtService.signAsync(
@@ -273,7 +273,7 @@ export class AuthService {
     return {
       token,
       refreshToken,
-      refeshExprires,
+      refreshExpires,
       tokenExpires,
     };
   }
@@ -316,7 +316,7 @@ export class AuthService {
       hash,
     });
 
-    const { token, refreshToken, tokenExpires, refeshExprires } =
+    const { token, refreshToken, tokenExpires, refreshExpires } =
       await this.getTokensData({
         id: user.id,
         role: user.role,
@@ -328,7 +328,7 @@ export class AuthService {
       token,
       refreshToken,
       tokenExpires,
-      refeshExprires,
+      refreshExpires,
     };
   }
 }

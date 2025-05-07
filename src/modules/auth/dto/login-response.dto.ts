@@ -11,5 +11,5 @@ export class LoginResponseDto {
   tokenExpires: number;
 
   @ApiProperty()
-  refeshExprires: number;
+  refreshExpires: number;
 }
