@@ -31,9 +31,6 @@ import { FilterUserDto } from './dto/query-user.dto';
 import { Pagination } from '../../utils/pagination/pagination.decorator';
 import { Errors } from '../../errors/errors';
 
-// @ApiBearerAuth()
-// @Roles(RoleEnum.ADMIN, RoleEnum.USER)
-// @UseGuards(AuthGuard('jwt'), RolesGuard)
 @ApiTags('Users')
 @Controller({
   path: 'users',
@@ -73,6 +70,9 @@ export class UsersController {
     return UserMapper.toDomain(user);
   }
 
+  @ApiBearerAuth()
+  @Roles(RoleEnum.ADMIN, RoleEnum.USER)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Patch('me')
   @HttpCode(HttpStatus.OK)
   async updateProfile(

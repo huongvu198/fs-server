@@ -20,6 +20,7 @@ import { AuthResetPasswordDto } from './dto/auth-reset-password.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { RefreshResponseDto } from './dto/refresh-response.dto';
 @ApiTags('Auth')
 @Controller({
   path: 'auth',
@@ -96,5 +97,20 @@ export class AuthController {
   public async me(@Req() req: any) {
     const userId = req.user.id;
     return this.service.getProfile(Number(userId));
+  }
+
+  @ApiBearerAuth()
+  @ApiOkResponse({
+    type: RefreshResponseDto,
+  })
+  @Post('refresh')
+  @UseGuards(AuthGuard('jwt-refresh'))
+  @HttpCode(HttpStatus.OK)
+  public refresh(@Request() request): Promise<RefreshResponseDto> {
+    console.log('request', request);
+    return this.service.refreshToken({
+      sessionId: request.user.sessionId,
+      hash: request.user.hash,
+    });
   }
 }

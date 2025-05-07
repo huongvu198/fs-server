@@ -14,15 +14,16 @@ export class SessionService {
   ) {}
 
   findById(id: number) {
-    return this.sessionRepository.find({ where: { id } });
+    return this.sessionRepository.findOne({ where: { id } });
   }
 
-  create(data: CreateSessionDto) {
+  async create(data: CreateSessionDto) {
     const sessionData = {
       hash: data.hash,
       user: { id: data.userId },
     };
-    return this.sessionRepository.create(sessionData);
+    const session = this.sessionRepository.create(sessionData);
+    return await this.sessionRepository.save(session);
   }
 
   update(id: number, payload: UpdateSessionDto) {

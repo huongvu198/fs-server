@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import ms from 'ms';
@@ -279,5 +280,48 @@ export class AuthService {
     }
 
     return UserMapper.toDomain(user);
+  }
+
+  async refreshToken(
+    data: Pick<JwtRefreshPayloadType, 'sessionId' | 'hash'>,
+  ): Promise<Omit<LoginResponseDto, 'user'>> {
+    console.log('data.sessionId', data.sessionId);
+    const session = await this.sessionService.findById(Number(data.sessionId));
+
+    if (!session) {
+      throw new UnauthorizedException();
+    }
+
+    if (session.hash !== data.hash) {
+      throw new UnauthorizedException();
+    }
+
+    const hash = crypto
+      .createHash('sha256')
+      .update(randomStringGenerator())
+      .digest('hex');
+
+    const user = await this.usersService.findById(session.user.id);
+
+    if (!user?.role) {
+      throw new UnauthorizedException();
+    }
+
+    await this.sessionService.update(session.id, {
+      hash,
+    });
+
+    const { token, refreshToken, tokenExpires } = await this.getTokensData({
+      id: user.id,
+      role: user.role,
+      sessionId: session.id,
+      hash,
+    });
+
+    return {
+      token,
+      refreshToken,
+      tokenExpires,
+    };
   }
 }
