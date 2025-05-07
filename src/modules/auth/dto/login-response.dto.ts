@@ -9,4 +9,7 @@ export class LoginResponseDto {
 
   @ApiProperty()
   tokenExpires: number;
+
+  @ApiProperty()
+  refeshExprires: number;
 }

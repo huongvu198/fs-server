@@ -10,7 +10,7 @@ export const config = {
     expiresIn: env.JWT_EXPIRES_IN ?? '1d',
     forgotExpiresIn: env.JWT_FORGOT_EXPIRES_IN ?? '1d',
     forgotSecret: env.JWT_FORGOT_SECRET,
-    refreshExpiresIn: env.JWT_REFRESH_EXPIRES_IN ?? '1d',
+    refreshExpiresIn: env.JWT_REFRESH_EXPIRES_IN ?? '10d',
     refreshSecret: env.JWT_REFRESH_SECRET,
     secret: env.JWT_SECRET,
   },
