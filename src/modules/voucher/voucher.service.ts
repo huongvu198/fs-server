@@ -211,13 +211,45 @@ export class VouchersService {
       relations: ['voucherUsers'],
     });
 
-    if (!voucher) throw new NotFoundException('Voucher không tồn tại');
-    if (!voucher.isActive)
-      throw new BadRequestException('Voucher không hoạt động');
+    if (!voucher) {
+      return {
+        message: 'Voucher không tồn tại',
+        id: null,
+        code: null,
+        discount: 0,
+        type: null,
+        startDate: null,
+        endDate: null,
+        status: false,
+      };
+    }
+
+    if (!voucher.isActive) {
+      return {
+        message: 'Voucher không hoạt động',
+        id: voucher.id,
+        code: voucher.code,
+        discount: voucher.discount,
+        type: voucher.type,
+        startDate: voucher.startDate,
+        endDate: voucher.endDate,
+        status: false,
+      };
+    }
 
     const now = new Date();
-    if (now < voucher.startDate || now > voucher.endDate)
-      throw new BadRequestException('Voucher hết hạn hoặc chưa bắt đầu');
+    if (now < voucher.startDate || now > voucher.endDate) {
+      return {
+        message: 'Voucher hết hạn hoặc chưa bắt đầu',
+        id: voucher.id,
+        code: voucher.code,
+        discount: voucher.discount,
+        type: voucher.type,
+        startDate: voucher.startDate,
+        endDate: voucher.endDate,
+        status: false,
+      };
+    }
 
     const user = await this.usersService.findById(userId);
     if (!user) throw new BadRequestException('User không hợp lệ');
@@ -230,20 +262,49 @@ export class VouchersService {
     });
 
     if (existed) {
-      if (existed.isUsed)
-        throw new BadRequestException('Bạn đã sử dụng voucher này rồi');
+      if (existed.isUsed) {
+        return {
+          message: 'Bạn đã sử dụng voucher này rồi',
+          id: voucher.id,
+          code: voucher.code,
+          discount: voucher.discount,
+          type: voucher.type,
+          startDate: voucher.startDate,
+          endDate: voucher.endDate,
+          status: false,
+        };
+      }
     } else {
       if (voucher.quantity) {
         const usedCount = await this.voucherUserRepo.count({
           where: { voucher: { id: voucher.id }, isUsed: true },
         });
 
-        if (usedCount >= voucher.quantity)
-          throw new BadRequestException('Voucher đã hết lượt sử dụng');
+        if (usedCount >= voucher.quantity) {
+          return {
+            message: 'Voucher đã hết lượt sử dụng',
+            id: voucher.id,
+            code: voucher.code,
+            discount: voucher.discount,
+            type: voucher.type,
+            startDate: voucher.startDate,
+            endDate: voucher.endDate,
+            status: false,
+          };
+        }
       }
     }
 
-    return { success: true, discount: voucher.discount };
+    return {
+      id: voucher.id,
+      code: voucher.code,
+      discount: voucher.discount,
+      type: voucher.type,
+      startDate: voucher.startDate,
+      endDate: voucher.endDate,
+      status: true,
+      message: 'Voucher hợp lệ',
+    };
   }
 
   async getListVoucherValidByUserId(userId: number) {

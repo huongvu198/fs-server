@@ -23,6 +23,7 @@ import { PaginationHeaderHelper } from '../../utils/pagination/pagination.helper
 import { replaceQuerySearch } from 'src/utils/helpers/common.helper';
 import removeAccents from 'remove-accents';
 import { ProductMapper } from './products.mapper';
+import { validate as isUuid } from 'uuid';
 
 @Injectable()
 export class ProductsService {
@@ -549,5 +550,84 @@ export class ProductsService {
     if (!size.isActive)
       throw new BadRequestException('Kích thước đã ngừng bán');
     return size;
+  }
+
+  async findProductsWithCondition(
+    pagination: IPagination,
+    filters: {
+      tag?: 'best-seller' | 'new-arrival';
+      search?: string;
+      color?: string[];
+      size?: string[];
+    },
+  ) {
+    const { tag, search, color, size } = filters;
+
+    let sortField = 'createdAt';
+    const sortOrder: 'ASC' | 'DESC' = 'DESC';
+
+    if (tag === 'best-seller') {
+      sortField = 'totalSoldQuantity';
+    }
+
+    const queryBuilder = this.productsRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.variants', 'variants')
+      .leftJoinAndSelect('variants.sizes', 'sizes')
+      .leftJoinAndSelect('variants.images', 'images')
+      .leftJoinAndSelect('product.segment', 'segment')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.subCategory', 'subCategory')
+      .where('product.isArchived = false')
+      .andWhere('product.isActive = true');
+
+    if (search) {
+      if (isUuid(search)) {
+        queryBuilder.andWhere(
+          `(product.id = :search OR 
+            product.segmentId = :search OR 
+            category.id = :search OR 
+            subCategory.id = :search)`,
+          { search },
+        );
+      } else {
+        queryBuilder.andWhere(
+          `(product.name ILIKE :search OR 
+            segment.name ILIKE :search OR 
+            category.name ILIKE :search OR 
+            subCategory.name ILIKE :search)`,
+          { search: `%${search}%` },
+        );
+      }
+    }
+
+    // Nếu color là một mảng, sử dụng IN để lọc
+    if (color && color.length > 0) {
+      queryBuilder.andWhere('variants.color ILIKE ANY (:colors)', {
+        colors: color.map((c) => `%${c}%`), // Chuyển các màu thành dạng LIKE
+      });
+    }
+
+    // Nếu size là một mảng, sử dụng IN để lọc
+    if (size && size.length > 0) {
+      queryBuilder.andWhere('sizes.size ILIKE ANY (:sizes)', {
+        sizes: size.map((s) => `%${s}%`), // Chuyển các kích thước thành dạng LIKE
+      });
+    }
+
+    queryBuilder.orderBy(`product.${sortField}`, sortOrder);
+    queryBuilder.skip(pagination.startIndex).take(pagination.perPage);
+
+    const [products, total] = await queryBuilder.getManyAndCount();
+
+    const responseHeaders = this.paginationHeaderHelper.getHeaders(
+      pagination,
+      total,
+    );
+
+    return {
+      headers: responseHeaders,
+      items: ProductMapper.toDomainList(products),
+    };
   }
 }
