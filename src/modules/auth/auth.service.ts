@@ -34,6 +34,7 @@ import dayjs from 'dayjs';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { RedisCacheService } from '../../utils/redis-cache/redis-cache.service';
 import { UserMapper } from '../users/users.mappers';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -330,5 +331,27 @@ export class AuthService {
       tokenExpires,
       refreshExpires,
     };
+  }
+
+  async changePassword(userId: number, dto: ChangePasswordDto): Promise<void> {
+    const { currentPassword, newPassword } = dto;
+
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Người dùng không tồn tại');
+    }
+
+    const isCurrentPasswordPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password,
+    );
+    if (!isCurrentPasswordPasswordValid) {
+      throw new BadRequestException('Mật khẩu cũ không chính xác');
+    }
+    await this.usersService.update(user.id, {
+      password: newPassword,
+    });
+
+    await this.sessionService.deleteByUserId(user.id);
   }
 }

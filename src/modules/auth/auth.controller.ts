@@ -21,6 +21,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { RefreshResponseDto } from './dto/refresh-response.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 @ApiTags('Auth')
 @Controller({
   path: 'auth',
@@ -112,5 +113,18 @@ export class AuthController {
       sessionId: request.user.sessionId,
       hash: request.user.hash,
     });
+  }
+
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Password changed successfully' })
+  @Post('change-password')
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async changePassword(
+    @Request() req: any,
+    @Body() dto: ChangePasswordDto,
+  ): Promise<void> {
+    const userId = req.user.id;
+    await this.service.changePassword(userId, dto);
   }
 }
