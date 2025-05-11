@@ -12,11 +12,18 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { SegmentsService } from './segments/segments.service';
-import { CreateSegmentDto } from './dto/segment.dto';
+import {
+  CreateSegmentDto,
+  GetSegmentDto,
+  UpdateSegmentDto,
+} from './dto/segment.dto';
 import { CategoriesService } from './categories/categories.service';
-import { CreateCategoryDto } from './dto/category.dto';
+import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 import { SubCategoriesService } from './subcategories/subcategories.service';
-import { CreateSubCategoryDto } from './dto/subcategory.dto';
+import {
+  CreateSubCategoryDto,
+  UpdateSubCategoryDto,
+} from './dto/subcategory.dto';
 import {
   CreateProductDto,
   GetProductDto,
@@ -91,6 +98,21 @@ export class ProductsController {
     return await this.productsService.findAllProductCms(query, pagination);
   }
 
+  @Get('segments-paging')
+  @ApiPagination()
+  @HttpCode(HttpStatus.OK)
+  async getSegments(
+    @Query() query: GetSegmentDto,
+    @Pagination() pagination: IPagination,
+  ) {
+    console.log('querylogs', query);
+    console.log('pagination', pagination);
+    return await this.segmentsService.findAllWithRelationForCms(
+      query,
+      pagination,
+    );
+  }
+
   @Get('/:id')
   @HttpCode(HttpStatus.OK)
   async findProductByIdCms(@Param('id') productId: string) {
@@ -101,5 +123,32 @@ export class ProductsController {
   @HttpCode(HttpStatus.OK)
   async deleteProduct(@Param('id') productId: string) {
     return await this.productsService.delete(productId);
+  }
+
+  @Patch('update-segment/:id')
+  @HttpCode(HttpStatus.OK)
+  async updateSegment(
+    @Param('id') segmentId: string,
+    @Body() dto: UpdateSegmentDto,
+  ) {
+    return await this.segmentsService.update(segmentId, dto);
+  }
+
+  @Patch('update-category/:id')
+  @HttpCode(HttpStatus.OK)
+  async updateCategory(
+    @Param('id') categoryId: string,
+    @Body() dto: UpdateCategoryDto,
+  ) {
+    return await this.categoriesService.update(categoryId, dto);
+  }
+
+  @Patch('update-subcategory/:id')
+  @HttpCode(HttpStatus.OK)
+  async updateSubCategory(
+    @Param('id') subCategoryId: string,
+    @Body() dto: UpdateSubCategoryDto,
+  ) {
+    return await this.subCategoriesService.update(subCategoryId, dto);
   }
 }

@@ -7,7 +7,10 @@ import { Repository } from 'typeorm';
 import { SegmentsService } from '../segments/segments.service';
 import { SubCategoryEntity } from '../../../entities/sub-categories.entity';
 import { CategoriesService } from '../categories/categories.service';
-import { CreateSubCategoryDto } from '../dto/subcategory.dto';
+import {
+  CreateSubCategoryDto,
+  UpdateSubCategoryDto,
+} from '../dto/subcategory.dto';
 
 @Injectable()
 export class SubCategoriesService {
@@ -53,5 +56,28 @@ export class SubCategoriesService {
       segmentId: dto.segmentId,
       categoryId: dto.categoryId,
     });
+  }
+
+  async update(id: string, dto: UpdateSubCategoryDto) {
+    const segment = await this.segmentService.findById(dto.segmentId);
+    if (!segment) {
+      throw new BadRequestException(Errors.SEGMENT_NOT_FOUND);
+    }
+
+    const category = await this.categoriesService.findById(dto.categoryId);
+    if (!category) {
+      throw new BadRequestException(Errors.PRODUCT_CATEGORY_NOT_FOUND);
+    }
+
+    const subCateSlug = convertToSlug(removeVietnameseTones(dto.name));
+
+    await this.subCategoryRepository.update(id, {
+      categoryId: dto.categoryId,
+      isActive: dto.isActive,
+      name: dto.name,
+      subCateSlug,
+    });
+
+    return this.findById(id);
   }
 }

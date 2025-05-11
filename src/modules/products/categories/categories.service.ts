@@ -5,7 +5,7 @@ import { Errors } from '../../../errors/errors';
 import { convertToSlug } from '../../../utils/transformers/slug.transformer';
 import { removeVietnameseTones } from '../../../utils/transformers/vietnamese.transformer';
 import { Repository } from 'typeorm';
-import { CreateCategoryDto } from '../dto/category.dto';
+import { CreateCategoryDto, UpdateCategoryDto } from '../dto/category.dto';
 import { SegmentsService } from '../segments/segments.service';
 
 @Injectable()
@@ -45,5 +45,21 @@ export class CategoriesService {
       cateSlug,
       segmentId: dto.segmentId,
     });
+  }
+
+  async update(id: string, dto: UpdateCategoryDto) {
+    const segment = await this.segmentService.findById(dto.segmentId);
+    if (!segment) {
+      throw new BadRequestException(Errors.SEGMENT_NOT_FOUND);
+    }
+
+    const cateSlug = convertToSlug(removeVietnameseTones(dto.name));
+
+    await this.categoryRepository.update(id, {
+      ...dto,
+      cateSlug,
+    });
+
+    return this.findById(id);
   }
 }

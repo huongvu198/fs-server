@@ -206,6 +206,11 @@ export class ProductsService {
       isArchived: false,
     });
     queryBuilder.andWhere('product.isActive = :isActive', { isActive: true });
+    queryBuilder.andWhere('segment.isActive = :isActive', { isActive: true });
+    queryBuilder.andWhere('category.isActive = :isActive', { isActive: true });
+    queryBuilder.andWhere('subCategory.isActive = :isActive', {
+      isActive: true,
+    });
 
     queryBuilder.orderBy(`product.${sortField}`, sortOrder);
 
