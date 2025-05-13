@@ -19,6 +19,9 @@ import {
   splitFullName,
 } from '../../utils/helpers/common.helper';
 import { PointModeEnum } from 'src/utils/enum';
+import { config } from 'src/config/app.config';
+
+const { email } = config.root;
 
 @Injectable()
 export class UsersService {
@@ -207,5 +210,13 @@ export class UsersService {
       throw new BadRequestException(Errors.USER_NOT_FOUND);
     }
     return user.point;
+  }
+
+  async findRootAdmin() {
+    return await this.usersRepository.findOne({
+      where: {
+        email: email,
+      },
+    });
   }
 }

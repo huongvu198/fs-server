@@ -13,6 +13,7 @@ import { PaymentGatewayModule } from './payment-gateway/payment-gateway.module';
 import { OrdersModule } from './orders/orders.module';
 import { WssModule } from './wss/wss.module';
 import { WebhookMudule } from './webhooks/webhook.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { WebhookMudule } from './webhooks/webhook.module';
     OrdersModule,
     WssModule,
     WebhookMudule,
+    ChatModule,
   ],
 })
 export class ApiModule {}
