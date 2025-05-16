@@ -325,4 +325,61 @@ export class OrdersService {
 
     await this.socketGateway.sendOrderPaidNotification(order.userId, order);
   }
+
+  async getOrdersWithPaging(pagination: IPagination) {
+    const excludedStatuses = [OrderStatusEnum.PENDING];
+    const excludePaymentStatus = [PaymentStatusEnum.PENDING];
+
+    const exclusionConditions = [
+      {
+        status: OrderStatusEnum.CANCELLED,
+        paymentMethod: PaymentMethodEnum.BANKING,
+        paymentStatus: PaymentStatusEnum.UNPAID,
+      },
+    ];
+
+    const query = this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.items', 'items')
+      .leftJoinAndSelect('order.voucher', 'voucher')
+      .leftJoinAndSelect('order.address', 'address')
+      .leftJoinAndSelect('order.transactions', 'transactions')
+      .leftJoinAndSelect('items.product', 'product')
+      .leftJoinAndSelect('items.variant', 'variant')
+      .leftJoinAndSelect('variant.images', 'images')
+      .leftJoinAndSelect('order.user', 'user')
+      .where('order.status NOT IN (:...excludedStatuses)', { excludedStatuses })
+      .andWhere('order.paymentStatus NOT IN (:...excludePaymentStatus)', {
+        excludePaymentStatus,
+      });
+
+    exclusionConditions.forEach((condition, index) => {
+      query.andWhere(
+        `NOT (
+        order.status = :status${index} AND
+        order.paymentMethod = :paymentMethod${index} AND
+        order.paymentStatus = :paymentStatus${index}
+      )`,
+        {
+          [`status${index}`]: condition.status,
+          [`paymentMethod${index}`]: condition.paymentMethod,
+          [`paymentStatus${index}`]: condition.paymentStatus,
+        },
+      );
+    });
+
+    query
+      .skip(pagination.startIndex)
+      .take(pagination.perPage)
+      .orderBy('order.createdAt', 'DESC');
+
+    const [orders, total] = await query.getManyAndCount();
+
+    const responseHeaders = this.paginationHeaderHelper.getHeaders(
+      pagination,
+      total,
+    );
+
+    return { headers: responseHeaders, items: orders };
+  }
 }
