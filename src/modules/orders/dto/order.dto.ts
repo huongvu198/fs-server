@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { PaymentMethodEnum } from '../../../utils/enum';
+import { OrderStatusEnum, PaymentMethodEnum } from '../../../utils/enum';
 
 export class CreateOrderDto {
   @ApiProperty()
@@ -20,4 +20,10 @@ export class CreateOrderDto {
   @IsOptional()
   @IsString()
   point?: string;
+}
+
+export class UpdateOrderDto {
+  @ApiProperty()
+  @IsEnum(OrderStatusEnum)
+  status: OrderStatusEnum;
 }

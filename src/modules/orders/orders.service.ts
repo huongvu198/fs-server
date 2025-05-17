@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { OrderItemEntity } from 'src/entities/order-items.entity';
 import { OrderEntity } from 'src/entities/orders.entity';
 import { In, LessThan, Repository } from 'typeorm';
-import { CreateOrderDto } from './dto/order.dto';
+import { CreateOrderDto, UpdateOrderDto } from './dto/order.dto';
 import { CartService } from '../carts/carts.service';
 import { VouchersService } from '../voucher/voucher.service';
 import {
@@ -35,6 +35,7 @@ import { InventoryHelper } from 'src/modules/products/inventory.helper';
 import { UsersService } from '../users/users.service';
 import { UserAddressService } from '../users/user-address.service';
 const { term } = config.payment;
+import { validate as isUuid } from 'uuid';
 
 @Injectable()
 export class OrdersService {
@@ -190,6 +191,15 @@ export class OrdersService {
     const timeRemaining = expiryTime.getTime() - now.getTime();
 
     setTimeout(async () => {
+      const expiredOrders = await this.orderRepository.findOne({
+        where: {
+          status: OrderStatusEnum.PENDING,
+          paymentStatus: PaymentStatusEnum.UNPAID,
+        },
+      });
+
+      if (!expiredOrders) return;
+
       await this.cancelOrder(order);
       await this.inventoryHelper.updateInventoryQuantities(
         orderItems,
@@ -326,7 +336,7 @@ export class OrdersService {
     await this.socketGateway.sendOrderPaidNotification(order.userId, order);
   }
 
-  async getOrdersWithPaging(pagination: IPagination) {
+  async getOrdersWithPaging(pagination: IPagination, search?: string) {
     const excludedStatuses = [OrderStatusEnum.PENDING];
     const excludePaymentStatus = [PaymentStatusEnum.PENDING];
 
@@ -368,6 +378,18 @@ export class OrdersService {
       );
     });
 
+    if (search && search.trim() !== '') {
+      const searchTerm = `%${search.trim()}%`;
+
+      if (isUuid(search.trim())) {
+        query.andWhere('CAST(order.id AS TEXT) LIKE :searchTerm', {
+          searchTerm,
+        });
+      } else {
+        query.andWhere('user.fullName ILIKE :searchTerm', { searchTerm });
+      }
+    }
+
     query
       .skip(pagination.startIndex)
       .take(pagination.perPage)
@@ -381,5 +403,43 @@ export class OrdersService {
     );
 
     return { headers: responseHeaders, items: orders };
+  }
+
+  async getOrderById(orderId: string) {
+    const query = this.orderRepository
+      .createQueryBuilder('order')
+      .where('order.id = :id', { id: orderId })
+      .leftJoinAndSelect('order.items', 'items')
+      .leftJoinAndSelect('order.voucher', 'voucher')
+      .leftJoinAndSelect('order.address', 'address')
+      .leftJoinAndSelect('order.transactions', 'transactions')
+      .leftJoinAndSelect('items.product', 'product')
+      .leftJoinAndSelect('items.variant', 'variant')
+      .leftJoinAndSelect('variant.images', 'images')
+      .leftJoinAndSelect('order.user', 'user');
+    const order = await query.getOne();
+    return order;
+  }
+
+  async manunalOrderUpdate(orderId: string, dto: UpdateOrderDto) {
+    if (dto.status === OrderStatusEnum.CANCELLED) {
+      await this.manualOrderCancellation(orderId);
+      return await this.getOrderById(orderId);
+    } else {
+      const order = await this.orderRepository.findOneBy({ id: orderId });
+
+      if (!order) {
+        throw new NotFoundException('Order không tồn tại');
+      }
+      order.status = dto.status;
+      if (
+        order.paymentMethod === PaymentMethodEnum.COD &&
+        dto.status === OrderStatusEnum.DELIVERED
+      ) {
+        order.paymentStatus === PaymentStatusEnum.PAID;
+      }
+      await this.orderRepository.save(order);
+      return await this.getOrderById(orderId);
+    }
   }
 }

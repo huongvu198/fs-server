@@ -65,3 +65,15 @@ export enum PointModeEnum {
   ADD = 'ADD',
   SUBTRACT = 'SUBTRACT',
 }
+
+export enum RevenueType {
+  MONTH = 'MONTH',
+  QUARTER = 'QUARTER',
+  YEAR = 'YEAR',
+  RANGE = 'RANGE',
+}
+
+export enum SellerType {
+  BEST = 'BEST',
+  LEAST = 'LEAST',
+}

@@ -14,6 +14,7 @@ import { OrdersModule } from './orders/orders.module';
 import { WssModule } from './wss/wss.module';
 import { WebhookMudule } from './webhooks/webhook.module';
 import { ChatModule } from './chat/chat.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ChatModule } from './chat/chat.module';
     WssModule,
     WebhookMudule,
     ChatModule,
+    AnalyticsModule,
   ],
 })
 export class ApiModule {}
