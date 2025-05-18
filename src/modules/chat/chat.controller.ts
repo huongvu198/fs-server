@@ -15,6 +15,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RoleEnum } from '../../utils/enum';
 import { Roles } from '../roles/roles.decorator';
 import { RolesGuard } from '../roles/roles.guard';
+import { SocketGateway } from '../wss/socket.gateway';
 
 @ApiBearerAuth()
 @Roles(RoleEnum.USER)
@@ -25,7 +26,10 @@ import { RolesGuard } from '../roles/roles.guard';
   version: '1',
 })
 export class ChatController {
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly socketGateway: SocketGateway,
+  ) {}
 
   // Tạo hoặc lấy cuộc trò chuyện
   @Post('conversation')
@@ -50,9 +54,13 @@ export class ChatController {
       content: string;
     },
   ) {
-    return this.chatService.createMessage({
+    const savedMessage = await this.chatService.createMessage({
       conversationId,
       ...body,
     });
+
+    this.socketGateway.emitNewMessage(savedMessage);
+
+    return savedMessage;
   }
 }

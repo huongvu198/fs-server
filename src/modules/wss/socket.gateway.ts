@@ -62,20 +62,15 @@ export class SocketGateway implements OnGatewayConnection {
   @SubscribeMessage(SocketEvent.SEND_MESSAGE)
   async handleSendMessage(
     @MessageBody()
-    data: {
-      conversationId: string;
-      senderId: number;
-      content: string;
-    },
+    data: { conversationId: string; senderId: number; content: string },
     @ConnectedSocket() client: Socket,
   ) {
-    // 1. Lưu tin nhắn vào DB
-    const savedMessage: MessageEntity =
-      await this.chatService.createMessage(data);
+    const savedMessage = await this.chatService.createMessage(data);
+    this.emitNewMessage(savedMessage);
+  }
 
-    // 2. Gửi cho tất cả client trong room conversation
-    this.server
-      .to(`conversation_${data.conversationId}`)
-      .emit(SocketEvent.NEW_MESSAGE, savedMessage);
+  emitNewMessage(message: MessageEntity) {
+    const room = `conversation_${message.conversationId}`;
+    this.server.to(room).emit(SocketEvent.NEW_MESSAGE, message);
   }
 }
