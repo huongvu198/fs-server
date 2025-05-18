@@ -101,4 +101,7 @@ export class OrderEntity {
 
   @Column({ type: 'timestamp', nullable: true })
   paymentExpiredAt: Date;
+
+  @Column({ type: 'jsonb', nullable: true })
+  qr: Record<string, any>;
 }

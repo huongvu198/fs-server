@@ -62,4 +62,10 @@ export class OrderPublicController {
   async manualOrderCancellation(@Param('orderId') orderId: string) {
     return await this.ordersService.manualOrderCancellation(orderId);
   }
+
+  @Get('detail/:orderId')
+  @HttpCode(HttpStatus.OK)
+  async getDetailPaymentByOrderId(@Param('orderId') orderId: string) {
+    return await this.ordersService.getDetailPaymentByOrderId(orderId);
+  }
 }

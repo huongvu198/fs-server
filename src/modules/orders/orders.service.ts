@@ -160,6 +160,8 @@ export class OrdersService {
           ` ${generateOrderCode(order.userId, order.createdAt, order.code)} | 
           amount : ${Number(total)} `,
         );
+        order.qr = QR;
+        await this.orderRepository.save(order);
         return {
           type: PaymentMethodEnum.BANKING,
           order,
@@ -191,14 +193,19 @@ export class OrdersService {
     const timeRemaining = expiryTime.getTime() - now.getTime();
 
     setTimeout(async () => {
-      const expiredOrders = await this.orderRepository.findOne({
+      const latestOrder = await this.orderRepository.findOne({
         where: {
-          status: OrderStatusEnum.PENDING,
-          paymentStatus: PaymentStatusEnum.UNPAID,
+          id: order.id,
         },
       });
 
-      if (!expiredOrders) return;
+      if (
+        !latestOrder ||
+        latestOrder.status !== OrderStatusEnum.PENDING ||
+        latestOrder.paymentStatus !== PaymentStatusEnum.UNPAID
+      ) {
+        return;
+      }
 
       await this.cancelOrder(order);
       await this.inventoryHelper.updateInventoryQuantities(
@@ -215,7 +222,10 @@ export class OrdersService {
           PointModeEnum.ADD,
         );
       }
-      this.socketGateway.sendPaymentExpiredNotification(order.userId, order.id);
+      this.socketGateway.sendPaymentExpiredNotification(
+        order.userId,
+        latestOrder,
+      );
     }, timeRemaining);
   }
 
@@ -441,5 +451,24 @@ export class OrdersService {
       await this.orderRepository.save(order);
       return await this.getOrderById(orderId);
     }
+  }
+
+  async getDetailPaymentByOrderId(orderId: string) {
+    const result = await this.orderRepository.findOne({
+      where: { id: orderId },
+      relations: [
+        'items',
+        'items.product',
+        'items.variant',
+        'items.variant.images',
+      ],
+    });
+
+    if (!result) throw new NotFoundException('Đơn hàng không tồn tại');
+    return {
+      order: result,
+      type: result.paymentMethod,
+      qr: result.qr || null,
+    };
   }
 }

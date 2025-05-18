@@ -26,10 +26,10 @@ export class SocketGateway implements OnGatewayConnection {
   constructor(private readonly chatService: ChatService) {}
 
   // Gửi thông báo hết hạn thanh toán
-  sendPaymentExpiredNotification(userId: number, orderId: string) {
+  sendPaymentExpiredNotification(userId: number, order: OrderEntity) {
     this.server
       .to(`user_${userId}`)
-      .emit(SocketEvent.ORDER_PAYMENT_EXPIRED, { orderId });
+      .emit(SocketEvent.ORDER_PAYMENT_EXPIRED, { order });
   }
 
   sendOrderPaidNotification(userId: number, order: OrderEntity) {
