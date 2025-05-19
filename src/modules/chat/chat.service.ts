@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { MessageEntity } from '../../entities/message.entity';
 import { ConversationEntity } from '../../entities/conversations.entity';
 import { UsersService } from '../users/users.service';
+import { MessageReponseType } from './dto/chat.dto';
 
 @Injectable()
 export class ChatService {
@@ -42,8 +43,7 @@ export class ChatService {
     conversationId: string;
     senderId: number;
     content: string;
-  }): Promise<MessageEntity> {
-    console.log('createMessage', data);
+  }): Promise<MessageReponseType> {
     const conversation = await this.conversationRepo.findOne({
       where: { id: data.conversationId },
     });
@@ -61,15 +61,32 @@ export class ChatService {
     conversation.lastMessageAt = new Date();
     await this.conversationRepo.save(conversation);
 
-    return this.messageRepo.save(message);
+    const messageSaved = await this.messageRepo.save(message);
+    return {
+      id: messageSaved.id,
+      conversationId: messageSaved.conversationId,
+      senderId: messageSaved.senderId,
+      content: messageSaved.content,
+      senderName: message.sender.fullName,
+      isRead: message.isRead,
+    };
   }
 
   // Lấy toàn bộ tin nhắn trong 1 cuộc trò chuyện
-  async getMessages(conversationId: string): Promise<MessageEntity[]> {
-    return this.messageRepo.find({
+  async getMessages(conversationId: string): Promise<MessageReponseType[]> {
+    const messages = await this.messageRepo.find({
       where: { conversationId },
       order: { createdAt: 'ASC' },
       relations: ['sender'],
     });
+
+    return messages.map((message) => ({
+      id: message.id,
+      conversationId: message.conversationId,
+      senderId: message.senderId,
+      content: message.content,
+      senderName: message.sender.fullName,
+      isRead: message.isRead,
+    }));
   }
 }

@@ -12,6 +12,7 @@ import { SocketEvent } from './wss.enum';
 import { OrderEntity } from '../../entities/orders.entity';
 import { MessageEntity } from '../../entities/message.entity';
 import { ChatService } from '../chat/chat.service';
+import { MessageReponseType } from '../chat/dto/chat.dto';
 
 @WebSocketGateway({
   cors: {
@@ -69,7 +70,7 @@ export class SocketGateway implements OnGatewayConnection {
     this.emitNewMessage(savedMessage);
   }
 
-  emitNewMessage(message: MessageEntity) {
+  emitNewMessage(message: MessageReponseType) {
     const room = `conversation_${message.conversationId}`;
     this.server.to(room).emit(SocketEvent.NEW_MESSAGE, message);
   }
