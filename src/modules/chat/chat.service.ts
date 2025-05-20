@@ -89,4 +89,89 @@ export class ChatService {
       isRead: message.isRead,
     }));
   }
+
+  // async getAllConversations() {
+  //   const rootAdmin = await this.usersService.findRootAdmin();
+  //   if (!rootAdmin) throw new NotFoundException('Root admin not found');
+
+  //   const conversations = await this.conversationRepo.find({
+  //     where: { adminId: rootAdmin.id },
+  //     relations: ['client', 'messages'],
+  //     order: {
+  //       updatedAt: 'DESC',
+  //     },
+  //   });
+
+  //   return conversations.map((conversation) => {
+  //     const lastMessage = conversation.messages?.length
+  //       ? conversation.messages.sort(
+  //           (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+  //         )[0]
+  //       : null;
+
+  //     return {
+  //       id: conversation.id,
+  //       client: {
+  //         id: conversation.client.id,
+  //         fullName: conversation.client.fullName,
+  //         email: conversation.client.email,
+  //       },
+  //       lastMessage: lastMessage
+  //         ? {
+  //             id: lastMessage.id,
+  //             content: lastMessage.content,
+  //             createdAt: lastMessage.createdAt,
+  //             senderId: lastMessage.senderId,
+  //           }
+  //         : null,
+  //       updatedAt: conversation.updatedAt,
+  //       isClosed: conversation.isClosed,
+  //     };
+  //   });
+  // }
+
+  async getAllConversations() {
+    const rootAdmin = await this.usersService.findRootAdmin();
+    if (!rootAdmin) throw new NotFoundException('Root admin not found');
+
+    const conversations = await this.conversationRepo
+      .createQueryBuilder('conversation')
+      .leftJoinAndSelect('conversation.client', 'client')
+      .leftJoinAndSelect('conversation.messages', 'messages')
+      .where('conversation.adminId = :adminId', { adminId: rootAdmin.id })
+      .andWhere((qb) => {
+        const subQuery = qb
+          .subQuery()
+          .select('1')
+          .from('messages', 'm')
+          .where('m.conversationId = conversation.id')
+          .getQuery();
+        return `EXISTS ${subQuery}`;
+      })
+      .orderBy('conversation.updatedAt', 'DESC')
+      .getMany();
+
+    return conversations.map((conversation) => {
+      const lastMessage = conversation.messages.sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+      )[0];
+
+      return {
+        id: conversation.id,
+        client: {
+          id: conversation.client.id,
+          fullName: conversation.client.fullName,
+          email: conversation.client.email,
+        },
+        lastMessage: {
+          id: lastMessage.id,
+          content: lastMessage.content,
+          createdAt: lastMessage.createdAt,
+          senderId: lastMessage.senderId,
+        },
+        updatedAt: conversation.updatedAt,
+        isClosed: conversation.isClosed,
+      };
+    });
+  }
 }

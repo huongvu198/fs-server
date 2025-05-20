@@ -17,9 +17,6 @@ import { Roles } from '../roles/roles.decorator';
 import { RolesGuard } from '../roles/roles.guard';
 import { SocketGateway } from '../wss/socket.gateway';
 
-@ApiBearerAuth()
-@Roles(RoleEnum.USER)
-@UseGuards(AuthGuard('jwt'), RolesGuard)
 @ApiTags('Chat')
 @Controller({
   path: 'chat',
@@ -32,6 +29,9 @@ export class ChatController {
   ) {}
 
   // Tạo hoặc lấy cuộc trò chuyện
+  @ApiBearerAuth()
+  @Roles(RoleEnum.USER)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Post('conversation')
   async getOrCreateConversation(@Req() req: any) {
     const userId = req.user.id;
@@ -39,28 +39,39 @@ export class ChatController {
   }
 
   // Lấy tin nhắn trong cuộc trò chuyện
+  // @ApiBearerAuth()
+  // @Roles(RoleEnum.USER)
+  // @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Get(':id/messages')
   async getMessages(@Param('id') conversationId: string) {
     return this.chatService.getMessages(conversationId);
   }
 
   // Gửi tin nhắn
-  @Post(':id/messages')
+  @ApiBearerAuth()
+  @Roles(RoleEnum.USER)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Post('messages')
   async sendMessage(
-    @Param('id') conversationId: string,
     @Body()
     body: {
+      conversationId: string;
       senderId: number;
       content: string;
     },
   ) {
     const savedMessage = await this.chatService.createMessage({
-      conversationId,
       ...body,
     });
 
     this.socketGateway.emitNewMessage(savedMessage);
 
     return savedMessage;
+  }
+
+  // @Roles(RoleEnum.ADMIN)
+  @Get('conversations')
+  async getAllConversations() {
+    return this.chatService.getAllConversations();
   }
 }

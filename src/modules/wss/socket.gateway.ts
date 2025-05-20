@@ -71,7 +71,9 @@ export class SocketGateway implements OnGatewayConnection {
   }
 
   emitNewMessage(message: MessageReponseType) {
+    this.logger.log('emitNewMessage', message);
     const room = `conversation_${message.conversationId}`;
+    this.logger.log('Emitting to room:', room);
     this.server.to(room).emit(SocketEvent.NEW_MESSAGE, message);
   }
 }
