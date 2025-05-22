@@ -77,3 +77,19 @@ export enum SellerType {
   BEST = 'BEST',
   LEAST = 'LEAST',
 }
+
+export enum DiscountEventEnum {
+  INVENTORY = 'INVENTORY',
+  ALL_SHOP = 'ALL_SHOP',
+  SEGMENT = 'SEGMENT',
+  CATEGORY = 'CATEGORY',
+  SUBCATEGORY = 'SUBCATEGORY',
+}
+
+export enum EventStatusEnum {
+  SCHEDULED = 'SCHEDULED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+  FAILED = 'FAILED',
+}

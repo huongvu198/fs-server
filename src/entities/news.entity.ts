@@ -17,18 +17,6 @@ export class NewsEntity {
   @Column({ type: 'text' })
   content: string;
 
-  @Column({ nullable: true })
-  thumbnail: string; // Ảnh đại diện bài viết
-
-  @Column({ nullable: true })
-  slug: string; // Dùng để tạo URL thân thiện
-
-  @Column({ type: 'boolean', default: true })
-  isPublished: boolean;
-
-  @Column()
-  authorId: number;
-
   @CreateDateColumn()
   createdAt: Date;
 

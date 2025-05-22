@@ -5,6 +5,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { config } from './config/app.config';
 import { initializeSwagger } from './utils/helpers/swagger.helper';
+import * as bodyParser from 'body-parser';
 
 const SERVER_PORT: number = +config.server.port;
 const SERVICE_NAME: string = config.service.name;
@@ -21,6 +22,8 @@ async function bootstrap() {
   });
   await initializeSwagger(app);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.use(bodyParser.json({ limit: '200mb' }));
+  app.use(bodyParser.urlencoded({ limit: '200mb', extended: true }));
   await app.listen(SERVER_PORT, '0.0.0.0');
 }
 void bootstrap().then(() => {
