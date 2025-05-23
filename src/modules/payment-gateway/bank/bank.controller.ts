@@ -14,14 +14,11 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { BankService } from './bank.service';
 import { CreateBankDto, GetBankDto } from '../dto/bank.dto';
-import { Roles } from 'src/modules/roles/roles.decorator';
-import { RolesGuard } from 'src/modules/roles/roles.guard';
-import { RoleEnum } from 'src/utils/enum';
 import {
   ApiPagination,
   IPagination,
-} from 'src/utils/pagination/pagination.interface';
-import { Pagination } from 'src/utils/pagination/pagination.decorator';
+} from '../../../utils/pagination/pagination.interface';
+import { Pagination } from '../../../utils/pagination/pagination.decorator';
 
 // @UseGuards(CmsGuard)
 @ApiTags('Bank')

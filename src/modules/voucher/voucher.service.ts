@@ -4,14 +4,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { VoucherUserEntity } from 'src/entities/voucher-user.entity';
-import { VoucherEntity } from 'src/entities/voucher.entity';
+import { VoucherUserEntity } from '../../entities/voucher-user.entity';
+import { VoucherEntity } from '../../entities/voucher.entity';
 import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { CreateVoucherDto, GetVoucherDto } from './dto/voucher.dto';
 import { UsersService } from '../users/users.service';
-import { IPagination } from 'src/utils/pagination/pagination.interface';
-import { PaginationHeaderHelper } from 'src/utils/pagination/pagination.helper';
-import { replaceQuerySearch } from 'src/utils/helpers/common.helper';
+import { IPagination } from '../../utils/pagination/pagination.interface';
+import { PaginationHeaderHelper } from '../../utils/pagination/pagination.helper';
+import { replaceQuerySearch } from '../../utils/helpers/common.helper';
 import removeAccents from 'remove-accents';
 import { isUUID } from 'class-validator';
 

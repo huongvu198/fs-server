@@ -1,4 +1,4 @@
-import { EntityRelationalHelper } from 'src/utils/relational-entity-helper';
+import { EntityRelationalHelper } from '../utils/relational-entity-helper';
 import {
   Column,
   Entity,

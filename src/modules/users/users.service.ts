@@ -18,8 +18,8 @@ import {
   replaceQuerySearch,
   splitFullName,
 } from '../../utils/helpers/common.helper';
-import { PointModeEnum } from 'src/utils/enum';
-import { config } from 'src/config/app.config';
+import { PointModeEnum } from '../../utils/enum';
+import { config } from '../../config/app.config';
 
 const { email } = config.root;
 

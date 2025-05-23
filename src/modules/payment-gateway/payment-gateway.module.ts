@@ -7,8 +7,8 @@ import { VietQRController } from './vietqr/vietqr.controller';
 import { VietQRService } from './vietqr/vietqr.service';
 import { BankService } from './bank/bank.service';
 import { BankController } from './bank/bank.controller';
-import { BankEntity } from 'src/entities/banks.entity';
-import { PaginationHeaderHelper } from 'src/utils/pagination/pagination.helper';
+import { BankEntity } from '../../entities/banks.entity';
+import { PaginationHeaderHelper } from '../../utils/pagination/pagination.helper';
 import { TransactionsService } from './transactions/transaction.service';
 import { TransactionBankEntity } from '../../entities/transactions.entity';
 

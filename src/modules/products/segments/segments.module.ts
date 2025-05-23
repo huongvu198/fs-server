@@ -1,4 +1,4 @@
-import { SegmentEntity } from 'src/entities/segments.entity';
+import { SegmentEntity } from '../../../entities/segments.entity';
 import { SegmentsService } from './segments.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module } from '@nestjs/common';

@@ -1,6 +1,6 @@
-import { RoleEntity } from 'src/entities/roles.entity';
+import { RoleEntity } from '../../entities/roles.entity';
 import { UserEntity } from '../../entities/users.entity';
-import { StatusEntity } from 'src/entities/status.entity';
+import { StatusEntity } from '../../entities/status.entity';
 import { CreateUserByAdminDto, CreateUserDto } from './dto/create-user.dto';
 import { AuthProvidersEnum, StatusEnum } from '../../utils/enum';
 import { joinFullName, splitFullName } from '../../utils/helpers/common.helper';

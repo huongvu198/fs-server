@@ -1,4 +1,4 @@
-import { UserEntity } from 'src/entities/users.entity';
+import { UserEntity } from '../../entities/users.entity';
 import { UserAddressEntity } from '../../entities/user-address.entity';
 
 export class UserAddressMapper {

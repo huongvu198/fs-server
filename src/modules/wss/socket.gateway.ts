@@ -10,7 +10,6 @@ import {
 import { Server, Socket } from 'socket.io';
 import { SocketEvent } from './wss.enum';
 import { OrderEntity } from '../../entities/orders.entity';
-import { MessageEntity } from '../../entities/message.entity';
 import { ChatService } from '../chat/chat.service';
 import { MessageReponseType } from '../chat/dto/chat.dto';
 
@@ -51,20 +50,23 @@ export class SocketGateway implements OnGatewayConnection {
   }
 
   @SubscribeMessage(SocketEvent.JOIN_CONVERSATION)
-  handleJoinConversation(
+  async handleJoinConversation(
     @MessageBody() data: { conversationId: string },
     @ConnectedSocket() client: Socket,
   ) {
     const room = `conversation_${data.conversationId}`;
-    client.join(room);
+    await client.join(room);
     this.logger.log(`Client ${client.id} joined room ${room}`);
   }
 
   @SubscribeMessage(SocketEvent.SEND_MESSAGE)
   async handleSendMessage(
     @MessageBody()
-    data: { conversationId: string; senderId: number; content: string },
-    @ConnectedSocket() client: Socket,
+    data: {
+      conversationId: string;
+      senderId: number;
+      content: string;
+    },
   ) {
     const savedMessage = await this.chatService.createMessage(data);
     this.emitNewMessage(savedMessage);

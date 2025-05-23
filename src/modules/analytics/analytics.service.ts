@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
@@ -8,7 +8,7 @@ import { OrderEntity } from '../../entities/orders.entity';
 import { ProductEntity } from '../../entities/products.entity';
 import { UserEntity } from '../../entities/users.entity';
 import { OrderStatusEnum, RevenueType, SellerType } from '../../utils/enum';
-import { Between, MoreThan, Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { IPagination } from '../../utils/pagination/pagination.interface';
 import { PaginationHeaderHelper } from '../../utils/pagination/pagination.helper';
 

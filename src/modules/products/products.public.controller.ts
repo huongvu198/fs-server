@@ -6,7 +6,7 @@ import {
   ApiPagination,
   IPagination,
 } from '../../utils/pagination/pagination.interface';
-import { Pagination } from 'src/utils/pagination/pagination.decorator';
+import { Pagination } from '../../utils/pagination/pagination.decorator';
 
 @ApiTags('Products-Public')
 @Controller({

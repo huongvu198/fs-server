@@ -1,4 +1,4 @@
-import { CartEntity } from 'src/entities/carts.entity';
+import { CartEntity } from '../../entities/carts.entity';
 import { CartItemMapper } from './cart-item/cart-item.mapper';
 
 export class CartMapper {

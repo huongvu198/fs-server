@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
-import { SessionEntity } from 'src/entities/sessions.entity';
+import { SessionEntity } from '../../entities/sessions.entity';
 import { Not, Repository } from 'typeorm';
 import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';

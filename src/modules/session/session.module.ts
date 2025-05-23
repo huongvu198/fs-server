@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { SessionService } from './session.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SessionEntity } from 'src/entities/sessions.entity';
+import { SessionEntity } from '../../entities/sessions.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([SessionEntity])],

@@ -2,7 +2,6 @@ import {
   Controller,
   Post,
   Body,
-  Put,
   Param,
   Delete,
   Get,
@@ -15,7 +14,7 @@ import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { UserAddressService } from './user-address.service';
 import { AuthGuard } from '@nestjs/passport';
-import { RoleEnum } from 'src/utils/enum';
+import { RoleEnum } from '../../utils/enum';
 import { Roles } from '../roles/roles.decorator';
 import { RolesGuard } from '../roles/roles.guard';
 

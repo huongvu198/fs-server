@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { StatusEntity } from '../../../entities/status.entity';
 import { Repository } from 'typeorm';
-import { StatusEnum } from 'src/utils/enum';
+import { StatusEnum } from '../../../utils/enum';
 
 @Injectable()
 export class StatusSeedService implements OnModuleInit {

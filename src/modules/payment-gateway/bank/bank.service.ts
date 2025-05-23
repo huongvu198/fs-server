@@ -6,7 +6,7 @@ import { CreateBankDto, GetBankDto } from '../dto/bank.dto';
 import { PaginationHeaderHelper } from '../../../utils/pagination/pagination.helper';
 import { replaceQuerySearch } from '../../../utils/helpers/common.helper';
 import removeAccents from 'remove-accents';
-import { IPagination } from 'src/utils/pagination/pagination.interface';
+import { IPagination } from '../../../utils/pagination/pagination.interface';
 
 @Injectable()
 export class BankService {

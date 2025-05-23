@@ -9,7 +9,7 @@ import {
   IsBoolean,
   Min,
 } from 'class-validator';
-import { DiscountType } from 'src/utils/enum';
+import { DiscountType } from '../../../utils/enum';
 
 export class CreateVoucherDto {
   @ApiProperty()

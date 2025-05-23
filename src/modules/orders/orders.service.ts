@@ -5,8 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OrderItemEntity } from 'src/entities/order-items.entity';
-import { OrderEntity } from 'src/entities/orders.entity';
+import { OrderItemEntity } from '../../entities/order-items.entity';
+import { OrderEntity } from '../../entities/orders.entity';
 import { In, LessThan, Repository } from 'typeorm';
 import { CreateOrderDto, UpdateOrderDto } from './dto/order.dto';
 import { CartService } from '../carts/carts.service';
@@ -31,7 +31,7 @@ import { SocketGateway } from '../wss/socket.gateway';
 import { PaginationHeaderHelper } from '../../utils/pagination/pagination.helper';
 import { IPagination } from '../../utils/pagination/pagination.interface';
 import { TransactionBankEntity } from '../../entities/transactions.entity';
-import { InventoryHelper } from 'src/modules/products/inventory.helper';
+import { InventoryHelper } from '../../modules/products/inventory.helper';
 import { UsersService } from '../users/users.service';
 import { UserAddressService } from '../users/user-address.service';
 const { term } = config.payment;
@@ -446,7 +446,7 @@ export class OrdersService {
         order.paymentMethod === PaymentMethodEnum.COD &&
         dto.status === OrderStatusEnum.DELIVERED
       ) {
-        order.paymentStatus === PaymentStatusEnum.PAID;
+        order.paymentStatus = PaymentStatusEnum.PAID;
       }
       await this.orderRepository.save(order);
       return await this.getOrderById(orderId);

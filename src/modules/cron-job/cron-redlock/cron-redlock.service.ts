@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { RedLockService } from 'src/utils/red-lock/red-lock.service';
+import { RedLockService } from '../../../utils/red-lock/red-lock.service';
 
 @Injectable()
 export class CronRedlockService {

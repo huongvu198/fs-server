@@ -20,7 +20,7 @@ import {
 import { Errors } from '../../errors/errors';
 import { IPagination } from '../../utils/pagination/pagination.interface';
 import { PaginationHeaderHelper } from '../../utils/pagination/pagination.helper';
-import { replaceQuerySearch } from 'src/utils/helpers/common.helper';
+import { replaceQuerySearch } from '../../utils/helpers/common.helper';
 import removeAccents from 'remove-accents';
 import { ProductMapper } from './products.mapper';
 import { validate as isUuid } from 'uuid';

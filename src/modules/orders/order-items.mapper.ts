@@ -1,6 +1,6 @@
-import { CartItemEntity } from 'src/entities/cart-item.entity';
-import { OrderEntity } from 'src/entities/orders.entity';
-import { OrderItemEntity } from 'src/entities/order-items.entity';
+import { CartItemEntity } from '../../entities/cart-item.entity';
+import { OrderEntity } from '../../entities/orders.entity';
+import { OrderItemEntity } from '../../entities/order-items.entity';
 
 export class OrderItemMapper {
   static toEntity(

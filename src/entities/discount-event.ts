@@ -1,5 +1,5 @@
-import { DiscountEventEnum, EventStatusEnum } from 'src/utils/enum';
-import { EntityRelationalHelper } from 'src/utils/relational-entity-helper';
+import { DiscountEventEnum, EventStatusEnum } from '../utils/enum';
+import { EntityRelationalHelper } from '../utils/relational-entity-helper';
 import {
   Column,
   CreateDateColumn,

@@ -30,11 +30,11 @@ import {
   UpdateProductDto,
 } from './dto/product.dto';
 import { ProductsService } from './products.service';
-import { Pagination } from 'src/utils/pagination/pagination.decorator';
+import { Pagination } from '../../utils/pagination/pagination.decorator';
 import {
   ApiPagination,
   IPagination,
-} from 'src/utils/pagination/pagination.interface';
+} from '../../utils/pagination/pagination.interface';
 
 @ApiTags('Products')
 @Controller({

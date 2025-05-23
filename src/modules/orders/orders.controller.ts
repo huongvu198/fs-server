@@ -7,13 +7,8 @@ import {
   Param,
   Patch,
   Query,
-  UseGuards,
 } from '@nestjs/common';
-import { RoleEnum } from '../../utils/enum';
-import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Roles } from '../roles/roles.decorator';
-import { RolesGuard } from '../roles/roles.guard';
+import { ApiTags } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import {
   ApiPagination,

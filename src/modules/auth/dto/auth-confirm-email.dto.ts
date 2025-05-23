@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsString, Length } from 'class-validator';
-import { VerifyCodeEnum } from 'src/utils/enum';
+import { VerifyCodeEnum } from '../../../utils/enum';
 
 export class AuthVerifyEmailDto {
   @ApiProperty()

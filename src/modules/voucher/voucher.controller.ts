@@ -11,11 +11,11 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { Pagination } from 'src/utils/pagination/pagination.decorator';
+import { Pagination } from '../../utils/pagination/pagination.decorator';
 import {
   ApiPagination,
   IPagination,
-} from 'src/utils/pagination/pagination.interface';
+} from '../../utils/pagination/pagination.interface';
 import { VouchersService } from './voucher.service';
 import { CreateVoucherDto, GetVoucherDto } from './dto/voucher.dto';
 

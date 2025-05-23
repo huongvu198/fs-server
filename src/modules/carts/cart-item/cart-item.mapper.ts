@@ -1,5 +1,5 @@
-import { CartItemEntity } from 'src/entities/cart-item.entity';
-import { CartItemStatusEnum } from 'src/utils/enum';
+import { CartItemEntity } from '../../../entities/cart-item.entity';
+import { CartItemStatusEnum } from '../../../utils/enum';
 
 export class CartItemMapper {
   static toDomain(item: CartItemEntity) {

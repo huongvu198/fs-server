@@ -12,7 +12,7 @@ export class NewService {
   ) {}
 
   async updateOrCreateNew(dto: UpdateNewDto) {
-    let news = await this.newsRepository.findOne({
+    const news = await this.newsRepository.findOne({
       where: {},
     });
 

@@ -9,7 +9,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { lowerCaseTransformer } from '../../../utils/transformers/lower-case.transformer';
-import { AuthProvidersEnum } from 'src/utils/enum';
+import { AuthProvidersEnum } from '../../../utils/enum';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'test1@example.com', type: String })

@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserAddressEntity } from 'src/entities/user-address.entity';
-import { UserEntity } from 'src/entities/users.entity';
+import { UserAddressEntity } from '../../entities/user-address.entity';
+import { UserEntity } from '../../entities/users.entity';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { UserAddressMapper } from './user-address.mapper';

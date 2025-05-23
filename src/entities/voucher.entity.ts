@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import { UserEntity } from './users.entity';
 import { VoucherUserEntity } from './voucher-user.entity';
-import { DiscountType } from 'src/utils/enum';
+import { DiscountType } from '../utils/enum';
 
 @Entity({ name: 'vouchers' })
 export class VoucherEntity {

@@ -4,11 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CartEntity } from 'src/entities/carts.entity';
+import { CartEntity } from '../../entities/carts.entity';
 import { Repository } from 'typeorm';
 import { AddToCartDto } from './dto/cart.dto';
 import { ProductsService } from '../products/products.service';
-import { CartItemEntity } from 'src/entities/cart-item.entity';
+import { CartItemEntity } from '../../entities/cart-item.entity';
 import { UsersService } from '../users/users.service';
 import { CartMapper } from './carts.mapper';
 
