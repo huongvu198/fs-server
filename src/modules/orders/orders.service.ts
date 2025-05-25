@@ -131,6 +131,7 @@ export class OrdersService {
       paymentExpiredAt: new Date(
         new Date().getTime() + Number(term) * 60 * 1000,
       ),
+      pointUsed: pointDiscount,
     });
 
     const orderItems = OrderItemMapper.toEntityList(cart.items, order);
@@ -302,21 +303,25 @@ export class OrdersService {
 
     order.status = OrderStatusEnum.CANCELLED;
     await this.orderRepository.save(order);
+    let pointRefund = Number(order.pointUsed || 0);
 
     if (
       order.paymentStatus === PaymentStatusEnum.PAID &&
       order.paymentMethod === PaymentMethodEnum.BANKING
     ) {
       order.paymentStatus = PaymentStatusEnum.REFUNDED;
-      const pointRefund = Number(order.total);
-      await this.usersService.updatePoint(
-        order.userId,
-        pointRefund,
-        PointModeEnum.ADD,
-      );
-      await this.orderRepository.save(order);
+      pointRefund = order.total;
+    } else {
+      pointRefund = order.pointUsed;
     }
 
+    await this.usersService.updatePoint(
+      order.userId,
+      pointRefund,
+      PointModeEnum.ADD,
+    );
+
+    await this.orderRepository.save(order);
     return order;
   }
 

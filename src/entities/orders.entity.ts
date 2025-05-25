@@ -104,4 +104,7 @@ export class OrderEntity {
 
   @Column({ type: 'jsonb', nullable: true })
   qr: Record<string, any>;
+
+  @Column({ nullable: true })
+  pointUsed: number;
 }
