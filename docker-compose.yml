@@ -5,7 +5,7 @@ services:
     build: .
     container_name: fs-server
     ports:
-      - '3000:8080'
+      - '3000:3000'
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -26,4 +26,3 @@ services:
 
 networks:
   app-network:
-    driver: bridge
