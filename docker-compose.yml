@@ -7,34 +7,15 @@ services:
     ports:
       - '3000:8080'
     environment:
-      - DATABASE_HOST=db
-      - DATABASE_PORT=5432
-      - DATABASE_USERNAME=postgres
-      - DATABASE_PASSWORD=postgres
-      - DATABASE_NAME=pinkystore
-
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     env_file:
       - ./.env
+    networks:
+      - app-network
     depends_on:
-      - db
-    networks:
-      - app-network
-  db:
-    image: postgres:15
-    container_name: postgres-db
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: pinkystore
-    ports:
-      - '5432:5432'
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    networks:
-      - app-network
+      - redis # nếu app dùng Redis
+
   redis:
     image: redis:7
     container_name: redis-cache
@@ -42,8 +23,7 @@ services:
       - '6379:6379'
     networks:
       - app-network
-volumes:
-  pgdata:
 
 networks:
   app-network:
+    driver: bridge
