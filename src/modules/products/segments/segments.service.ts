@@ -34,6 +34,52 @@ export class SegmentsService {
       .getMany();
   }
 
+  async findAllActiveCategories() {
+    const segments = await this.segmentRepository
+      .createQueryBuilder('segment')
+      .leftJoinAndSelect(
+        'segment.categories',
+        'categories',
+        'categories.isActive = :categoryActive',
+        { categoryActive: true },
+      )
+      .leftJoinAndSelect(
+        'categories.subCategories',
+        'subCategories',
+        'subCategories.isActive = :subCategoryActive',
+        { subCategoryActive: true },
+      )
+      .where('segment.isActive = :segmentActive', { segmentActive: true })
+      .orderBy('segment.createdAt', 'DESC')
+      .getMany();
+
+    const filteredSegments = segments.filter(
+      (segment) =>
+        segment.categories &&
+        segment.categories.length > 0 &&
+        segment.categories.every((category) => category.subCategories),
+    );
+
+    const mappedData = filteredSegments.flatMap((segment) =>
+      segment.categories
+        .filter(
+          (category) =>
+            Array.isArray(category.subCategories) &&
+            category.subCategories.length > 0,
+        )
+        .map((category) => ({
+          id: category.id,
+          name: `${segment.name} - ${category.name}`,
+          children: category.subCategories.map((sub) => ({
+            id: sub.id,
+            name: sub.name,
+          })),
+        })),
+    );
+
+    return mappedData;
+  }
+
   async findAllWithRelationForCms(
     query: GetSegmentDto,
     pagination: IPagination,

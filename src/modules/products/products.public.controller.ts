@@ -23,6 +23,11 @@ export class ProductsPublicController {
     return await this.segmentsService.findAllWithRelations();
   }
 
+  @Get('categories')
+  async getCategories() {
+    return await this.segmentsService.findAllActiveCategories();
+  }
+
   @Get('new-arrivals')
   @ApiPagination()
   async getNewArrivals(@Pagination() pagination: IPagination) {
