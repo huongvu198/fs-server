@@ -33,7 +33,7 @@ export class ChatController {
   @Post('conversation')
   async getOrCreateConversation(@Req() req: any) {
     const userId = req.user.id;
-    return this.chatService.getOrCreateConversation(userId);
+    return await this.chatService.getOrCreateConversation(userId);
   }
 
   // Lấy tin nhắn trong cuộc trò chuyện

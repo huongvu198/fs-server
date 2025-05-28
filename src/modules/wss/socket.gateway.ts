@@ -59,6 +59,18 @@ export class SocketGateway implements OnGatewayConnection {
     this.logger.log(`Client ${client.id} joined room ${room}`);
   }
 
+  @SubscribeMessage(SocketEvent.JOIN_ADMIN)
+  async handleJoinAdminRoom(@ConnectedSocket() client: Socket) {
+    const adminId = client.handshake.query.userId;
+    if (!adminId) {
+      this.logger.error('No adminId found in handshake query');
+      return;
+    }
+    const room = `admin_${adminId}`;
+    await client.join(room);
+    this.logger.log(`Admin client ${client.id} joined room ${room}`);
+  }
+
   @SubscribeMessage(SocketEvent.SEND_MESSAGE)
   async handleSendMessage(
     @MessageBody()
@@ -68,8 +80,22 @@ export class SocketGateway implements OnGatewayConnection {
       content: string;
     },
   ) {
+    const messageCount = await this.chatService.countMessages(
+      data.conversationId,
+    );
+
     const savedMessage = await this.chatService.createMessage(data);
     this.emitNewMessage(savedMessage);
+
+    if (messageCount === 0) {
+      const { conversation, adminId } =
+        await this.chatService.getConversationById(data.conversationId);
+      const conversationPayload = {
+        ...conversation,
+        lastMessage: savedMessage,
+      };
+      this.emitNewConversation(conversationPayload, adminId);
+    }
   }
 
   emitNewMessage(message: MessageReponseType) {
@@ -77,5 +103,12 @@ export class SocketGateway implements OnGatewayConnection {
     const room = `conversation_${message.conversationId}`;
     this.logger.log('Emitting to room:', room);
     this.server.to(room).emit(SocketEvent.NEW_MESSAGE, message);
+  }
+
+  emitNewConversation(conversation: any, adminId: number) {
+    this.logger.log(`emitNewConversation ${JSON.stringify(conversation)}`);
+    const adminRoom = `admin_${adminId}`;
+    this.logger.log(`Emitting NEW_CONVERSATION to room: ${adminRoom}`);
+    this.server.to(adminRoom).emit(SocketEvent.NEW_CONVERSATION, conversation);
   }
 }

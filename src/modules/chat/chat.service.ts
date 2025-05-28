@@ -19,7 +19,7 @@ export class ChatService {
   ) {}
 
   // Tạo hoặc lấy cuộc trò chuyện giữa client và admin
-  async getOrCreateConversation(userId: number): Promise<ConversationEntity> {
+  async getOrCreateConversation(userId: number) {
     let conversation = await this.conversationRepo.findOne({
       where: { clientId: userId, isClosed: false },
     });
@@ -62,6 +62,7 @@ export class ChatService {
     await this.conversationRepo.save(conversation);
 
     const messageSaved = await this.messageRepo.save(message);
+
     return {
       id: messageSaved.id,
       conversationId: messageSaved.conversationId,
@@ -70,6 +71,10 @@ export class ChatService {
       senderName: message.sender.fullName,
       isRead: message.isRead,
     };
+  }
+
+  async countMessages(conversationId: string): Promise<number> {
+    return this.messageRepo.count({ where: { conversationId } });
   }
 
   // Lấy toàn bộ tin nhắn trong 1 cuộc trò chuyện
@@ -89,46 +94,6 @@ export class ChatService {
       isRead: message.isRead,
     }));
   }
-
-  // async getAllConversations() {
-  //   const rootAdmin = await this.usersService.findRootAdmin();
-  //   if (!rootAdmin) throw new NotFoundException('Root admin not found');
-
-  //   const conversations = await this.conversationRepo.find({
-  //     where: { adminId: rootAdmin.id },
-  //     relations: ['client', 'messages'],
-  //     order: {
-  //       updatedAt: 'DESC',
-  //     },
-  //   });
-
-  //   return conversations.map((conversation) => {
-  //     const lastMessage = conversation.messages?.length
-  //       ? conversation.messages.sort(
-  //           (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-  //         )[0]
-  //       : null;
-
-  //     return {
-  //       id: conversation.id,
-  //       client: {
-  //         id: conversation.client.id,
-  //         fullName: conversation.client.fullName,
-  //         email: conversation.client.email,
-  //       },
-  //       lastMessage: lastMessage
-  //         ? {
-  //             id: lastMessage.id,
-  //             content: lastMessage.content,
-  //             createdAt: lastMessage.createdAt,
-  //             senderId: lastMessage.senderId,
-  //           }
-  //         : null,
-  //       updatedAt: conversation.updatedAt,
-  //       isClosed: conversation.isClosed,
-  //     };
-  //   });
-  // }
 
   async getAllConversations() {
     const rootAdmin = await this.usersService.findRootAdmin();
@@ -173,5 +138,46 @@ export class ChatService {
         isClosed: conversation.isClosed,
       };
     });
+  }
+  async getConversationById(conversationId: string) {
+    const rootAdmin = await this.usersService.findRootAdmin();
+    if (!rootAdmin) throw new NotFoundException('Root admin not found');
+
+    const conversation = await this.conversationRepo
+      .createQueryBuilder('conversation')
+      .leftJoinAndSelect('conversation.client', 'client')
+      .leftJoinAndSelect('conversation.messages', 'messages')
+      .where('conversation.id = :conversationId', { conversationId })
+      .andWhere('conversation.adminId = :adminId', { adminId: rootAdmin.id })
+      .orderBy('conversation.updatedAt', 'DESC')
+      .getOne();
+
+    if (!conversation) throw new NotFoundException('Conversation not found');
+
+    const lastMessage = conversation.messages.sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    )[0];
+
+    return {
+      conversation: {
+        id: conversation.id,
+        client: {
+          id: conversation.client.id,
+          fullName: conversation.client.fullName,
+          email: conversation.client.email,
+        },
+        lastMessage: lastMessage
+          ? {
+              id: lastMessage.id,
+              content: lastMessage.content,
+              createdAt: lastMessage.createdAt,
+              senderId: lastMessage.senderId,
+            }
+          : null,
+        updatedAt: conversation.updatedAt,
+        isClosed: conversation.isClosed,
+      },
+      adminId: rootAdmin.id,
+    };
   }
 }
