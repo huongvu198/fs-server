@@ -69,8 +69,9 @@ export class VouchersService {
       throw new BadRequestException('Voucher không hoạt động');
 
     const now = new Date();
-    if (now < voucher.startDate || now > voucher.endDate)
-      throw new BadRequestException('Voucher hết hạn hoặc chưa bắt đầu');
+    if (now < voucher.startDate)
+      throw new BadRequestException('Voucher chưa bắt đầu');
+    if (now > voucher.endDate) throw new BadRequestException('Voucher hết hạn');
 
     const user = await this.usersService.findById(userId);
     if (!user) throw new BadRequestException('User không hợp lệ');
@@ -146,13 +147,23 @@ export class VouchersService {
       };
     }
     const now = new Date();
-    if (now < voucher.startDate || now > voucher.endDate) {
+    if (now < voucher.startDate) {
       return {
         available: false,
         discount: 0,
         type: voucher.type,
         id: voucher.id,
-        message: 'Voucher hết hạn hoặc chưa bắt đầu',
+        message: 'Voucher chưa bắt đầu',
+      };
+    }
+
+    if (now > voucher.endDate) {
+      return {
+        available: false,
+        discount: 0,
+        type: voucher.type,
+        id: voucher.id,
+        message: 'Voucher đã hết hạn',
       };
     }
 
@@ -238,9 +249,21 @@ export class VouchersService {
     }
 
     const now = new Date();
-    if (now < voucher.startDate || now > voucher.endDate) {
+    if (now < voucher.startDate) {
       return {
-        message: 'Voucher hết hạn hoặc chưa bắt đầu',
+        message: 'Voucher chưa bắt đầu',
+        id: voucher.id,
+        code: voucher.code,
+        discount: voucher.discount,
+        type: voucher.type,
+        startDate: voucher.startDate,
+        endDate: voucher.endDate,
+        status: false,
+      };
+    }
+    if (now > voucher.endDate) {
+      return {
+        message: 'Voucher hết hạn',
         id: voucher.id,
         code: voucher.code,
         discount: voucher.discount,

@@ -64,10 +64,10 @@ export class OrdersService {
     }
 
     const address = await this.userAddressService.findOne(dto.addressId);
-
     if (!address) throw new NotFoundException('Địa chỉ không tồn tại');
 
-    let discount: number = 0;
+    // === Bắt đầu kiểm tra và chuẩn bị voucher ===
+    let discount = 0;
     let type: DiscountType = DiscountType.FIXED;
 
     if (dto.voucherId) {
@@ -75,16 +75,14 @@ export class OrdersService {
         userId,
         dto.voucherId,
       );
-      if (voucher.available) {
-        discount = voucher.discount;
-        type = voucher.type!;
-        await this.vouchersService.useVoucher(userId, dto.voucherId);
-      }
       if (!voucher.available) {
         throw new BadRequestException(voucher.message);
       }
+      discount = voucher.discount;
+      type = voucher.type!;
     }
 
+    // === Tính toán tổng phụ ===
     const subtotal = cart.items.reduce((sum, item) => {
       const priceAfterDiscount = item.product.discount
         ? Number(item.product.price) * (1 - Number(item.product.discount) / 100)
@@ -92,16 +90,12 @@ export class OrdersService {
       return sum + priceAfterDiscount * item.quantity;
     }, 0);
 
-    let discountAmount = 0;
+    // === Áp dụng giảm giá voucher ===
+    let discountAmount =
+      type === DiscountType.PERCENT ? (subtotal * discount) / 100 : discount;
 
-    if (type === DiscountType.FIXED) {
-      discountAmount = discount;
-    } else if (type === DiscountType.PERCENT) {
-      discountAmount = (subtotal * discount) / 100;
-    }
-
+    // === Kiểm tra điểm và trừ trước (rollback nếu fail sau này) ===
     let pointDiscount = 0;
-
     if (dto.point) {
       pointDiscount = Number(dto.point);
       await this.usersService.updatePoint(
@@ -113,6 +107,24 @@ export class OrdersService {
 
     const total = subtotal - discountAmount - pointDiscount;
 
+    // === Chuẩn bị dữ liệu QR nếu là BANKING (check trước khi lưu order) ===
+    let qr = null;
+    const code = generateRandomCode(6);
+    if (dto.paymentMethod === PaymentMethodEnum.BANKING) {
+      const bank = await this.bankService.getBankWithFurthestLastOrder();
+      if (!bank)
+        throw new BadRequestException('Không có tài khoản thụ hưởng hợp lệ');
+
+      qr = await this.vietQRService.generateQR({
+        accountNo: bank.accountNo,
+        accountName: bank.accountName,
+        acqId: bank.acqId,
+        amount: Number(total),
+        addInfo: generateOrderCode(userId, new Date(), code), // tạm tạo trước
+      });
+    }
+
+    // === Tạo đơn hàng sau khi đã kiểm tra tất cả điều kiện ===
     const order = await this.orderRepository.save({
       userId,
       addressId: dto.addressId,
@@ -127,61 +139,43 @@ export class OrdersService {
           : OrderStatusEnum.PROCESSING,
       paymentMethod: dto.paymentMethod,
       paymentStatus: PaymentStatusEnum.UNPAID,
-      code: generateRandomCode(6),
+      code: code,
       paymentExpiredAt: new Date(
         new Date().getTime() + Number(term) * 60 * 1000,
       ),
       pointUsed: pointDiscount,
+      qr,
     });
+
+    // === Sau khi tạo order xong mới thao tác DB còn lại ===
+    if (dto.voucherId) {
+      await this.vouchersService.useVoucher(userId, dto.voucherId);
+    }
 
     const orderItems = OrderItemMapper.toEntityList(cart.items, order);
     await this.orderItemsRepository.save(orderItems);
+
     await this.cartService.deleteAllCartItem(cartId);
+
     await this.inventoryHelper.updateInventoryQuantities(
       orderItems,
       InventoryModeEnum.DECREASE,
     );
 
-    switch (dto.paymentMethod) {
-      case PaymentMethodEnum.BANKING: {
-        const bank = await this.bankService.getBankWithFurthestLastOrder();
-        if (!bank) {
-          throw new BadRequestException('Không có tài khoản thụ hưởng hợp lệ');
-        }
-        const QR = await this.vietQRService.generateQR({
-          accountNo: bank.accountNo,
-          accountName: bank.accountName,
-          acqId: bank.acqId,
-          amount: Number(total),
-          addInfo: generateOrderCode(order.userId, order.createdAt, order.code),
-        });
-        this.startPaymentCountdown(order, orderItems, pointDiscount);
-        console.log(
-          'MessagePayment',
-          ` ${generateOrderCode(order.userId, order.createdAt, order.code)} | 
-          amount : ${Number(total)} `,
-        );
-        order.qr = QR;
-        await this.orderRepository.save(order);
-        return {
-          type: PaymentMethodEnum.BANKING,
-          order,
-          qr: QR,
-        };
-      }
-
-      case PaymentMethodEnum.COD: {
-        return {
-          type: PaymentMethodEnum.COD,
-          order,
-          qr: null,
-        };
-      }
-
-      default: {
-        throw new BadRequestException('Phương thức thanh toán không hợp lệ');
-      }
+    if (dto.paymentMethod === PaymentMethodEnum.BANKING) {
+      this.startPaymentCountdown(order, orderItems, pointDiscount);
+      return {
+        type: PaymentMethodEnum.BANKING,
+        order,
+        qr,
+      };
     }
+
+    return {
+      type: PaymentMethodEnum.COD,
+      order,
+      qr: null,
+    };
   }
 
   private startPaymentCountdown(

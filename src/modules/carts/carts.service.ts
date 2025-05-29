@@ -25,7 +25,7 @@ export class CartService {
 
   async addToCart(userId: number, productData: AddToCartDto) {
     const cart = await this.getOrCreateCart(userId);
-    await this.insertOrMergeCartItem(cart, productData);
+    await this.insertOrMergeCartItem(cart, productData, true);
     await this.cartRepository.save(cart);
     return CartMapper.toDomain(cart);
   }
@@ -34,7 +34,7 @@ export class CartService {
     const cart = await this.getOrCreateCart(userId);
 
     for (const item of items) {
-      await this.insertOrMergeCartItem(cart, item);
+      await this.insertOrMergeCartItem(cart, item, false);
     }
     await this.cartRepository.save(cart);
     return CartMapper.toDomain(cart);
@@ -73,7 +73,11 @@ export class CartService {
     return cart;
   }
 
-  private async insertOrMergeCartItem(cart: CartEntity, item: AddToCartDto) {
+  private async insertOrMergeCartItem(
+    cart: CartEntity,
+    item: AddToCartDto,
+    isAdd: boolean = true,
+  ) {
     const [product, variant, size] = await Promise.all([
       this.productsService.validateProduct(item.productId),
       this.productsService.validateVariant(item.variantId),
@@ -87,15 +91,29 @@ export class CartService {
         cartItem.product.id === product.id,
     );
 
+    const requestedQuantity = item.quantity;
+    const availableInventory = size.inventory;
+
     if (existingItem) {
-      existingItem.quantity = item.quantity;
+      if (!isAdd) return;
+      const newTotalQuantity = existingItem.quantity + requestedQuantity;
+
+      if (newTotalQuantity > availableInventory) {
+        throw new BadRequestException('Số lượng tồn kho không đủ để thêm!');
+      }
+      existingItem.quantity = newTotalQuantity;
     } else {
+      if (!isAdd) return;
+      if (requestedQuantity > availableInventory) {
+        throw new BadRequestException('Số lượng tồn kho không đủ để thêm!');
+      }
+
       const newItem = this.cartItemRepository.create({
         cart,
         product,
         variant,
         size,
-        quantity: item.quantity,
+        quantity: requestedQuantity,
       });
       cart.items.push(newItem);
     }
