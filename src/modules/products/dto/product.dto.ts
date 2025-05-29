@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsBoolean,
   IsNotEmpty,
   IsNumber,
@@ -257,4 +258,15 @@ export class UpdateProductDto {
   @Type(() => UpdateVariantDto)
   @IsOptional()
   variants: UpdateVariantDto[];
+}
+
+export class UpdateDiscountBulk {
+  @ApiProperty()
+  @IsArray()
+  @IsNotEmpty({ each: true })
+  ids: string[];
+
+  @ApiProperty()
+  @IsNumber()
+  discount: number;
 }

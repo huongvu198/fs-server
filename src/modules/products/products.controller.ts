@@ -27,6 +27,7 @@ import {
 import {
   CreateProductDto,
   GetProductDto,
+  UpdateDiscountBulk,
   UpdateProductDto,
 } from './dto/product.dto';
 import { ProductsService } from './products.service';
@@ -105,8 +106,6 @@ export class ProductsController {
     @Query() query: GetSegmentDto,
     @Pagination() pagination: IPagination,
   ) {
-    console.log('querylogs', query);
-    console.log('pagination', pagination);
     return await this.segmentsService.findAllWithRelationForCms(
       query,
       pagination,
@@ -150,5 +149,11 @@ export class ProductsController {
     @Body() dto: UpdateSubCategoryDto,
   ) {
     return await this.subCategoriesService.update(subCategoryId, dto);
+  }
+
+  @Patch('discount/bulk-update')
+  @HttpCode(HttpStatus.OK)
+  async bulkUpdateDiscount(@Body() dto: UpdateDiscountBulk) {
+    return await this.productsService.bulkUpdateDiscount(dto);
   }
 }

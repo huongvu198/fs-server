@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductEntity } from '../../entities/products.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CategoriesService } from './categories/categories.service';
 import { SegmentsService } from './segments/segments.service';
 import { SubCategoriesService } from './subcategories/subcategories.service';
@@ -15,6 +15,7 @@ import { VariantImageEntity } from '../../entities/variant-image.entity';
 import {
   CreateProductDto,
   GetProductDto,
+  UpdateDiscountBulk,
   UpdateProductDto,
 } from './dto/product.dto';
 import { Errors } from '../../errors/errors';
@@ -673,5 +674,20 @@ export class ProductsService {
       },
     );
     return { message: `Đã áp dụng giảm giá cho danh mục con ${event.pid}` };
+  }
+
+  async bulkUpdateDiscount(dto: UpdateDiscountBulk) {
+    const { ids, discount } = dto;
+
+    await this.productsRepository.update(
+      { id: In(ids) },
+      { discount },
+    );
+
+    const result = await this.productsRepository.find({
+      where: { id: In(ids) },
+    });
+
+    return result;
   }
 }
