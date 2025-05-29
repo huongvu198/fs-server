@@ -24,6 +24,7 @@ import { replaceQuerySearch } from '../../utils/helpers/common.helper';
 import removeAccents from 'remove-accents';
 import { ProductMapper } from './products.mapper';
 import { validate as isUuid } from 'uuid';
+import { DiscountEventEntity } from '../../entities/discount-event.entity';
 
 @Injectable()
 export class ProductsService {
@@ -634,5 +635,43 @@ export class ProductsService {
       headers: responseHeaders,
       items: ProductMapper.toDomainList(products),
     };
+  }
+
+  async applyAllShopDiscount(event: DiscountEventEntity) {
+    await this.productsRepository.update(
+      {},
+      {
+        discount: event.discount,
+      },
+    );
+    return { message: 'Đã áp dụng giảm giá toàn shop' };
+  }
+
+  async applyCategoryDiscount(event: DiscountEventEntity) {
+    if (!event.pid) {
+      throw new BadRequestException('Thiếu thông tin category id (pid)');
+    }
+
+    await this.productsRepository.update(
+      { category: { id: event.pid } },
+      {
+        discount: event.discount,
+      },
+    );
+    return { message: `Đã áp dụng giảm giá cho danh mục ${event.pid}` };
+  }
+
+  async applySubCategoryDiscount(event: DiscountEventEntity) {
+    if (!event.pid) {
+      throw new BadRequestException('Thiếu thông tin subcategory id (pid)');
+    }
+
+    await this.productsRepository.update(
+      { subCategory: { id: event.pid } },
+      {
+        discount: event.discount,
+      },
+    );
+    return { message: `Đã áp dụng giảm giá cho danh mục con ${event.pid}` };
   }
 }

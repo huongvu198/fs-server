@@ -79,17 +79,14 @@ export enum SellerType {
 }
 
 export enum DiscountEventEnum {
-  INVENTORY = 'INVENTORY',
   ALL_SHOP = 'ALL_SHOP',
-  SEGMENT = 'SEGMENT',
   CATEGORY = 'CATEGORY',
   SUBCATEGORY = 'SUBCATEGORY',
 }
 
 export enum EventStatusEnum {
-  SCHEDULED = 'SCHEDULED',
-  IN_PROGRESS = 'IN_PROGRESS',
+  IN_COMING = 'IN_COMING',
+  ON_GOING = 'ON_GOING',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
-  FAILED = 'FAILED',
 }

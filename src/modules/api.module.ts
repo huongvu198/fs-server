@@ -16,6 +16,8 @@ import { WebhookMudule } from './webhooks/webhook.module';
 import { ChatModule } from './chat/chat.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { NewsModule } from './news/news.module';
+import { EventsModule } from './events/event.module';
+import { CronModule } from './cron-job/cron.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { NewsModule } from './news/news.module';
     ChatModule,
     AnalyticsModule,
     NewsModule,
+    EventsModule,
+    CronModule,
   ],
 })
 export class ApiModule {}

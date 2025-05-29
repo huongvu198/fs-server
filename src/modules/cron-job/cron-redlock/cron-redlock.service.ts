@@ -3,10 +3,8 @@ import { RedLockService } from '../../../utils/red-lock/red-lock.service';
 
 @Injectable()
 export class CronRedlockService {
-  constructor(
-    private readonly redLockService: RedLockService,
-    private readonly logging = new Logger(CronRedlockService.name),
-  ) {}
+  private readonly logging = new Logger(CronRedlockService.name);
+  constructor(private readonly redLockService: RedLockService) {}
 
   async runWithLock(lockKey: string, task: () => Promise<void>) {
     let lock: any;

@@ -12,23 +12,26 @@ import {
 @Entity({ name: 'discount-events' })
 export class DiscountEventEntity extends EntityRelationalHelper {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
+
+  @Column()
+  name: string;
 
   @Column({
     type: 'enum',
     enum: DiscountEventEnum,
-    default: DiscountEventEnum.INVENTORY,
+    default: DiscountEventEnum.ALL_SHOP,
   })
   type: DiscountEventEnum;
 
   @Column({
     type: 'enum',
     enum: EventStatusEnum,
-    default: EventStatusEnum.SCHEDULED,
+    default: EventStatusEnum.IN_COMING,
   })
   status: EventStatusEnum;
 
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   pid: string;
 
   @Column({ type: Number, default: 0 })

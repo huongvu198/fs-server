@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ScheduleModule } from '@nestjs/schedule';
-import { CronRedlockModule } from './cron-redlock/cron-redlock.module';
+import { EventsCronModule } from './cron-events/cron-event.mudule';
 
 @Module({
-  imports: [ScheduleModule.forRoot(), CronRedlockModule],
+  imports: [EventsCronModule],
 })
 export class CronModule {}
