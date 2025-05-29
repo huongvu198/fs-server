@@ -99,6 +99,18 @@ export class ProductsController {
     return await this.productsService.findAllProductCms(query, pagination);
   }
 
+  @Get('all-category')
+  @HttpCode(HttpStatus.OK)
+  async getAllCategory() {
+    return await this.categoriesService.findAll();
+  }
+
+  @Get('all-subcategory')
+  @HttpCode(HttpStatus.OK)
+  async getAllSubCategory() {
+    return await this.subCategoriesService.findAll();
+  }
+
   @Get('segments-paging')
   @ApiPagination()
   @HttpCode(HttpStatus.OK)

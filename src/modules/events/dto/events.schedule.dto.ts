@@ -28,7 +28,7 @@ export class CreateScheduleDTO {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  pid: string;
+  pid?: string;
 
   @ApiProperty({ type: Date, example: '2025-06-01T00:00:00.000Z' })
   @IsDateString()
@@ -59,7 +59,7 @@ export class UpdateScheduleDTO {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  pid: string;
+  pid?: string;
 
   @ApiProperty({ type: Date, example: '2025-06-01T00:00:00.000Z' })
   @IsDateString()
