@@ -80,4 +80,18 @@ export class SubCategoriesService {
 
     return this.findById(id);
   }
+
+  async findAllForEvent() {
+    const subCategories = await this.subCategoryRepository.find({
+      relations: ['category', 'category.segment'],
+      where: {
+        isActive: true,
+      },
+    });
+
+    return subCategories.map(({ category, ...rest }) => ({
+      ...rest,
+      name: `${category.segment.name} - ${category.name} - ${rest.name}`,
+    }));
+  }
 }

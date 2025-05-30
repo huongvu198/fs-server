@@ -102,13 +102,13 @@ export class ProductsController {
   @Get('all-category')
   @HttpCode(HttpStatus.OK)
   async getAllCategory() {
-    return await this.categoriesService.findAll();
+    return await this.categoriesService.findAllForEvent();
   }
 
   @Get('all-subcategory')
   @HttpCode(HttpStatus.OK)
   async getAllSubCategory() {
-    return await this.subCategoriesService.findAll();
+    return await this.subCategoriesService.findAllForEvent();
   }
 
   @Get('segments-paging')

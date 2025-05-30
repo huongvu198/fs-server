@@ -62,4 +62,17 @@ export class CategoriesService {
 
     return this.findById(id);
   }
+
+  async findAllForEvent() {
+    const categories = await this.categoryRepository.find({
+      relations: ['segment'],
+      where: {
+        isActive: true,
+      },
+    });
+    return categories.map(({ segment, ...rest }) => ({
+      ...rest,
+      name: `[${segment.name}] - ${rest.name}`,
+    }));
+  }
 }
