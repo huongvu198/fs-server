@@ -72,7 +72,7 @@ export class CategoriesService {
     });
     return categories.map(({ segment, ...rest }) => ({
       ...rest,
-      name: `[${segment.name}] - ${rest.name}`,
+      name: `${segment.name} - ${rest.name}`,
     }));
   }
 }
