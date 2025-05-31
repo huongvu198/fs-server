@@ -340,7 +340,6 @@ export class AnalyticsService {
     });
     queryBuilder.andWhere('product.totalInventory > 0');
 
-    queryBuilder.orderBy('product.createdAt', 'ASC');
     queryBuilder.addOrderBy('product.totalInventory', 'DESC');
 
     queryBuilder.skip(pagination.startIndex);
