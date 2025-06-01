@@ -13,6 +13,7 @@ import { SubCategoriesModule } from './subcategories/subcategories.module';
 import { ProductsPublicController } from './products.public.controller';
 import { ProductsService } from './products.service';
 import { InventoryHelper } from './inventory.helper';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { InventoryHelper } from './inventory.helper';
     SegmentsModule,
     CategoriesModule,
     SubCategoriesModule,
+    ReviewsModule,
   ],
   controllers: [ProductsController, ProductsPublicController],
   providers: [PaginationHeaderHelper, ProductsService, InventoryHelper],

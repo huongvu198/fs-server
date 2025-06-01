@@ -265,10 +265,18 @@ export class OrdersService {
         'transactions',
         'items.product',
         'items.variant.images',
+        'items.review',
       ],
       skip: pagination.startIndex,
       take: pagination.perPage,
       order: { createdAt: 'DESC' },
+    });
+
+    orders.forEach((order) => {
+      order.items.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
     });
 
     const responseHeaders = this.paginationHeaderHelper.getHeaders(

@@ -1,5 +1,14 @@
-import { Controller, Get, Query } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { SegmentsService } from './segments/segments.service';
 import { ProductsService } from './products.service';
 import {
@@ -7,6 +16,12 @@ import {
   IPagination,
 } from '../../utils/pagination/pagination.interface';
 import { Pagination } from '../../utils/pagination/pagination.decorator';
+import { CreateReviewDto } from './dto/review.dto';
+import { ReviewService } from './reviews/reviews.service';
+import { AuthGuard } from '@nestjs/passport';
+import { RoleEnum } from '../../utils/enum';
+import { Roles } from '../roles/roles.decorator';
+import { RolesGuard } from '../roles/roles.guard';
 
 @ApiTags('Products-Public')
 @Controller({
@@ -16,6 +31,7 @@ export class ProductsPublicController {
   constructor(
     private readonly segmentsService: SegmentsService,
     private readonly productsService: ProductsService,
+    private readonly reviewService: ReviewService,
   ) {}
 
   @Get('segments')
@@ -58,5 +74,23 @@ export class ProductsPublicController {
       color: colorArray,
       size: sizeArray,
     });
+  }
+
+  @ApiBearerAuth()
+  @Roles(RoleEnum.USER)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Post('create-review')
+  async createReview(@Body() dto: CreateReviewDto, @Req() req: any) {
+    const userId = req.user.id;
+    return this.reviewService.createReview(dto, userId);
+  }
+
+  @Get('review-by-productId/:id')
+  @ApiPagination()
+  async getReviews(
+    @Param('id') id: string,
+    @Pagination() pagination: IPagination,
+  ) {
+    return this.reviewService.getReviewsByProduct(id, pagination);
   }
 }

@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToOne,
 } from 'typeorm';
 import { OrderItemEntity } from './order-items.entity';
 import { UserEntity } from './users.entity';
@@ -27,7 +28,7 @@ export class ProductReviewEntity {
   @Column()
   orderItemId: string;
 
-  @ManyToOne(() => OrderItemEntity)
+  @OneToOne(() => OrderItemEntity, (item) => item.review)
   @JoinColumn({ name: 'orderItemId' })
   orderItem: OrderItemEntity;
 
@@ -45,13 +46,10 @@ export class ProductReviewEntity {
   @JoinColumn({ name: 'productId' })
   product: ProductEntity;
 
-  @Column({
-    type: 'enum',
-    enum: RatingValue,
-  })
-  rating: RatingValue;
+  @Column({ default: 0 })
+  rating: number;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true })
   comment: string;
 
   @Column({ default: true })

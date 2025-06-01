@@ -13,6 +13,8 @@ export class ProductMapper {
       totalQuantity: raw.totalQuantity,
       totalSoldQuantity: raw.totalSoldQuantity,
       totalInventory: raw.totalInventory,
+      averageRating: Number(raw.averageRating),
+      totalReviews: raw.totalReviews,
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
       segment: raw.segment
