@@ -406,7 +406,7 @@ export class ProductsService {
           let existingSize;
           for (const newSize of newVariant.sizes) {
             existingSize = existingVariant.sizes.find(
-              (s) => s.id === newSize.id,
+              (s) => s.id === newSize.id || s.size === newSize.size,
             );
 
             if (existingSize) {
@@ -679,10 +679,7 @@ export class ProductsService {
   async bulkUpdateDiscount(dto: UpdateDiscountBulk) {
     const { ids, discount } = dto;
 
-    await this.productsRepository.update(
-      { id: In(ids) },
-      { discount },
-    );
+    await this.productsRepository.update({ id: In(ids) }, { discount });
 
     const result = await this.productsRepository.find({
       where: { id: In(ids) },

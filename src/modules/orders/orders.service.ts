@@ -110,17 +110,19 @@ export class OrdersService {
     // === Chuẩn bị dữ liệu QR nếu là BANKING (check trước khi lưu order) ===
     let qr = null;
     const code = generateRandomCode(6);
+
     if (dto.paymentMethod === PaymentMethodEnum.BANKING) {
       const bank = await this.bankService.getBankWithFurthestLastOrder();
       if (!bank)
         throw new BadRequestException('Không có tài khoản thụ hưởng hợp lệ');
 
+      const infor = generateOrderCode(userId, new Date(), code);
       qr = await this.vietQRService.generateQR({
         accountNo: bank.accountNo,
         accountName: bank.accountName,
         acqId: bank.acqId,
         amount: Number(total),
-        addInfo: generateOrderCode(userId, new Date(), code), // tạm tạo trước
+        addInfo: infor,
       });
     }
 
