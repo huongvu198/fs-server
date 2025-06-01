@@ -71,7 +71,7 @@ export class UsersService {
     if (filterOptions?.search) {
       const search = removeAccents(replaceQuerySearch(filterOptions.search));
       queryBuilder.andWhere(
-        'LOWER(user.email) LIKE LOWER(:search) OR LOWER(user.firstName) LIKE LOWER(:search) OR LOWER(user.lastName) LIKE LOWER(:search) OR LOWER(user.fullName) LIKE LOWER(:search)',
+        'LOWER(user.email) ILIKE LOWER(:search) OR LOWER(user.firstName) ILIKE LOWER(:search) OR LOWER(user.lastName) ILIKE LOWER(:search) OR LOWER(user.fullName) ILIKE LOWER(:search)',
         { search: `%${search.toLowerCase()}%` },
       );
     }

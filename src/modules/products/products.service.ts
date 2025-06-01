@@ -247,7 +247,7 @@ export class ProductsService {
 
     if (query?.name) {
       const name = removeAccents(replaceQuerySearch(query.name));
-      queryBuilder.andWhere('LOWER(product.name) LIKE LOWER(:name)', {
+      queryBuilder.andWhere('LOWER(product.name) ILIKE LOWER(:name)', {
         name: `%${name.toLowerCase()}%`,
       });
     }

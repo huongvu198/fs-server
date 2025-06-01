@@ -36,7 +36,7 @@ export class BankService {
     if (query?.search) {
       const search = removeAccents(replaceQuerySearch(query.search));
       queryBuilder.andWhere(
-        `(LOWER(bank.accountName) LIKE LOWER(:search) OR LOWER(bank.accountNo) LIKE LOWER(:search))`,
+        `(LOWER(bank.accountName) ILIKE LOWER(:search) OR LOWER(bank.accountNo) ILIKE LOWER(:search))`,
         { search: `%${search.toLowerCase()}%` },
       );
     }

@@ -177,7 +177,7 @@ export class EventsService {
     });
 
     if (typeof search === 'string' && search.trim() !== '') {
-      queryBuilder.andWhere('LOWER(event.name) LIKE LOWER(:search)', {
+      queryBuilder.andWhere('LOWER(event.name) ILIKE LOWER(:search)', {
         search: `%${search.toLowerCase()}%`,
       });
     }

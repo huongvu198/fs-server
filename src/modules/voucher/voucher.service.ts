@@ -373,7 +373,7 @@ export class VouchersService {
     // Áp dụng điều kiện tìm kiếm theo mã voucher nếu có
     if (query?.code) {
       const code = removeAccents(replaceQuerySearch(query.code));
-      queryBuilder.andWhere('LOWER(voucher.code) LIKE LOWER(:code)', {
+      queryBuilder.andWhere('LOWER(voucher.code) ILIKE LOWER(:code)', {
         code: `%${code.toLowerCase()}%`,
       });
     }
