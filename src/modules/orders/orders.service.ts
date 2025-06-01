@@ -291,7 +291,11 @@ export class OrdersService {
     const order = await this.orderRepository.findOne({
       where: {
         id: orderId,
-        status: In([OrderStatusEnum.PROCESSING, OrderStatusEnum.PENDING]),
+        status: In([
+          OrderStatusEnum.PROCESSING,
+          OrderStatusEnum.PENDING,
+          OrderStatusEnum.CONFIRMED,
+        ]),
       },
       relations: ['items'],
     });
