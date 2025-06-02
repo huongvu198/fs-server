@@ -563,7 +563,7 @@ export class ProductsService {
   async findProductsWithCondition(
     pagination: IPagination,
     filters: {
-      tag?: 'best-seller' | 'new-arrival';
+      tag?: 'best-seller' | 'new-arrival' | 'event';
       search?: string;
       color?: string[];
       size?: string[];

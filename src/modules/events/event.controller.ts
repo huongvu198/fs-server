@@ -60,4 +60,9 @@ export class EventsController {
   async deleteEvent(@Param('id') id: string) {
     return await this.eventsService.deleteEventSchedule(id);
   }
+
+  @Get('schedule/active')
+  async getOngoingEvents() {
+    return await this.eventsService.getEventOnGoing();
+  }
 }

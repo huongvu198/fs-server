@@ -213,4 +213,21 @@ export class EventsService {
       items: events,
     };
   }
+
+  async getEventOnGoing() {
+    const events = await this.eventScheduleRepo.findOne({
+      where: {
+        status: In([EventStatusEnum.ON_GOING]),
+      },
+    });
+
+    if (!events) return null;
+    return {
+      key: 'events',
+      type: 'event',
+      label: events.name.toUpperCase(),
+      eventType: events.type,
+      pid: events.pid,
+    };
+  }
 }
