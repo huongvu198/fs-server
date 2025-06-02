@@ -34,7 +34,7 @@ export class CartService {
     const cart = await this.getOrCreateCart(userId);
 
     for (const item of items) {
-      await this.insertOrMergeCartItem(cart, item, false);
+      await this.insertOrMergeCartItem(cart, item, true);
     }
     await this.cartRepository.save(cart);
     return CartMapper.toDomain(cart);

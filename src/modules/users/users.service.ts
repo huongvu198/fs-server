@@ -185,20 +185,26 @@ export class UsersService {
     return await this.usersRepository.find();
   }
 
-  async updatePoint(userId: number, point: number, mode: PointModeEnum) {
+  async updatePoint(
+    userId: number,
+    point: number | string,
+    mode: PointModeEnum,
+  ) {
     const user = await this.usersRepository.findOne({ where: { id: userId } });
 
     if (!user) {
       throw new BadRequestException(Errors.USER_NOT_FOUND);
     }
 
+    const parsedPoint = Math.floor(Number(point));
+
     if (mode === PointModeEnum.SUBTRACT) {
-      if (user.point < point) {
+      if (user.point < parsedPoint) {
         throw new BadRequestException('Không đủ điểm để sử dụng');
       }
-      user.point -= point;
+      user.point -= parsedPoint;
     } else if (mode === PointModeEnum.ADD) {
-      user.point += point;
+      user.point += parsedPoint;
     }
 
     await this.usersRepository.save(user);

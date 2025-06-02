@@ -464,6 +464,7 @@ export class ProductsService {
               color: newVariant.color,
               isActive: newVariant.isActive ?? true,
               productId: existingProduct.id,
+              product: existingProduct,
             },
           );
 

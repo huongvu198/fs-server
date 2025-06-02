@@ -323,6 +323,7 @@ export class OrdersService {
       pointRefund = order.pointUsed;
     }
 
+    console.log('pointRefund', pointRefund);
     await this.usersService.updatePoint(
       order.userId,
       pointRefund,

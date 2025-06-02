@@ -24,7 +24,9 @@ export class VariantEntity extends EntityRelationalHelper {
   @Column({ type: Boolean, default: false })
   isActive: boolean;
 
-  @ManyToOne(() => ProductEntity, (product) => product.variants)
+  @ManyToOne(() => ProductEntity, (product) => product.variants, {
+    nullable: false,
+  })
   @JoinColumn({ name: 'productId' })
   product: ProductEntity;
 
