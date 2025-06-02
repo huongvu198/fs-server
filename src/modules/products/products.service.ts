@@ -26,6 +26,8 @@ import removeAccents from 'remove-accents';
 import { ProductMapper } from './products.mapper';
 import { validate as isUuid } from 'uuid';
 import { DiscountEventEntity } from '../../entities/discount-event.entity';
+import { SocketGateway } from '../wss/socket.gateway';
+import { SocketEvent } from '../wss/wss.enum';
 
 @Injectable()
 export class ProductsService {
@@ -40,6 +42,7 @@ export class ProductsService {
     private readonly categoriesService: CategoriesService,
     private readonly subCategoriesService: SubCategoriesService,
     private readonly paginationHeaderHelper: PaginationHeaderHelper,
+    private readonly socketGateway: SocketGateway,
   ) {}
   async create(dto: CreateProductDto) {
     // Kiểm tra và lấy thông tin danh mục (category)
@@ -377,6 +380,8 @@ export class ProductsService {
       newSegmentId = segment.id;
     }
 
+    const priceChanged = dto.price !== existingProduct.price;
+
     // Cập nhật thông tin sản phẩm
     Object.assign(existingProduct, {
       name: dto.name,
@@ -516,6 +521,10 @@ export class ProductsService {
 
     if (!product) {
       throw new BadRequestException(Errors.PRODUCT_NOT_FOUND);
+    }
+
+    if (priceChanged) {
+      this.socketGateway.emitProductPriceChangedToAll(productId, dto.price);
     }
 
     return ProductMapper.toDomain(product);

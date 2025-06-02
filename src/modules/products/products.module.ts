@@ -14,6 +14,7 @@ import { ProductsPublicController } from './products.public.controller';
 import { ProductsService } from './products.service';
 import { InventoryHelper } from './inventory.helper';
 import { ReviewsModule } from './reviews/reviews.module';
+import { WssModule } from '../wss/wss.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     CategoriesModule,
     SubCategoriesModule,
     ReviewsModule,
+    WssModule,
   ],
   controllers: [ProductsController, ProductsPublicController],
   providers: [PaginationHeaderHelper, ProductsService, InventoryHelper],

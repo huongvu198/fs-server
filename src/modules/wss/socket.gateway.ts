@@ -111,4 +111,11 @@ export class SocketGateway implements OnGatewayConnection {
     this.logger.log(`Emitting NEW_CONVERSATION to room: ${adminRoom}`);
     this.server.to(adminRoom).emit(SocketEvent.NEW_CONVERSATION, conversation);
   }
+
+  emitProductPriceChangedToAll(productId: string, newPrice: number) {
+    this.server.emit(SocketEvent.PRODUCT_PRICE_CHANGED, {
+      productId,
+      newPrice,
+    });
+  }
 }
