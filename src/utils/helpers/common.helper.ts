@@ -69,26 +69,34 @@ export function generateRandomCode(length: number = 6): string {
 }
 
 export function decodeOrderCode(orderCode: string) {
-  // Kiểm tra mã có đúng định dạng hay không (bắt đầu với 'FS')
-  if (!orderCode.startsWith('FS')) {
+  // Lấy phần bắt đầu bằng 'FS' (nếu có thêm phần khác sau dấu cách thì bỏ)
+  const match = orderCode.match(/FS\w+/);
+  if (!match) {
+    throw new Error('Invalid order code format');
+  }
+
+  const cleanCode = match[0];
+
+  // Kiểm tra mã có đúng định dạng hay không
+  if (!cleanCode.startsWith('FS')) {
     throw new Error('Invalid order code format');
   }
 
   // Lấy timestamp từ chuỗi (14 ký tự sau 'FS')
-  const timestamp = orderCode.slice(2, 16);
+  const timestamp = cleanCode.slice(2, 16);
 
   // Lấy phần còn lại, tách userId và code
-  const remainingCode = orderCode.slice(16);
+  const remainingCode = cleanCode.slice(16);
 
-  // Phần còn lại là userId + code. Giả sử code luôn có 6 ký tự.
-  const userIdLength = remainingCode.length - 6; // Phần còn lại là userId + code (6 ký tự code)
+  // Giả sử code luôn có 6 ký tự cuối
+  const userIdLength = remainingCode.length - 6;
   const userId = parseInt(remainingCode.slice(0, userIdLength), 10);
   const code = remainingCode.slice(userIdLength);
 
   return {
-    createdAt: parseTimestampISO(timestamp).toISOString(), // Thời gian tạo đơn hàng (yyyyMMddHHmmss)
-    userId, // userId đã mã hóa
-    code, // Mã ngẫu nhiên đã được thêm vào
+    createdAt: parseTimestampISO(timestamp).toISOString(),
+    userId,
+    code,
   };
 }
 
